@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>通过 JSON 字符串来创建对象</h2>
+    <p>
+        First Name: <span id="fname"></span><br />
+        Last Name: <span id="lname"></span><br />
+    </p>
+    <script type="text/javascript">
+        var txt = '{"employees":[' +
+            '{"firstName":"Bill","lastName":"Gates" },' +
+            '{"firstName":"George","lastName":"Bush" },' +
+            '{"firstName":"Thomas","lastName":"Carter" }]}';
+        var obj = eval ("(" + txt + ")");
+        document.getElementById("fname").innerHTML=obj.employees[1].firstName
+        document.getElementById("lname").innerHTML=obj.employees[1].lastName
+        for (var key in obj.employees[1]){
+            alert(obj.employees[1][key])
+        }
+
+    </script>
+<script>
+    var json = [{dd:'SB',AA:'东东',re1:123},{cccc:'dd',lk:'1qw'}];
+    for(var i=0,l=json.length;i<l;i++){
+        for(var key in json[i]){
+            // alert(key)
+            // alert(key+':'+json[i][key]);
+        }
+    }
+</script>
+</body>
+</html>

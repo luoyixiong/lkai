@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>简易CSS3 Tab菜单DEMO演示</title>
+    <link rel="stylesheet" href="../css3-simple-tab/css/normalize.css">
+    <link rel="stylesheet" href="../css3-simple-tab/css/style.css" media="screen" type="text/css" />
+    <script>
+        function change($tab) {
+            $atab=$tab.find('.tabBlock-tab.is-active');
+            alert($atab.next().index());
+            $tabBlock=$('.tabBlock')
+            $panes = $tabBlock.find('.tabBlock-pane');
+            $activeTab = $tabBlock.find('.tabBlock-tab.is-active');
+            $panes.hide();
+            $($panes[$activeTab.index()]).show();
+            var $context = $atab.next().closest('.tabBlock');
+
+            if (!$atab.next().hasClass('is-active')) {
+                $atab.next().siblings().removeClass('is-active');
+                $atab.next().addClass('is-active');
+
+                TabBlock.showPane($atab.next().index(), $context);
+            }
+            // alert('a')
+            // $activeTab = $tab.find('.tabBlock-tab.is-active');
+            // alert($activeTab.index())
+
+
+        }
+    </script>
+</head>
+<body>
+<figure class="tabBlock">
+    <ul class="tabBlock-tabs">
+        <li class="tabBlock-tab is-active">Tab 1</li>
+        <li class="tabBlock-tab">Tab 2</li>
+        <li class="tabBlock-tab">Tab 3</li>
+    </ul>
+    <div class="tabBlock-content">
+        <div class="tabBlock-pane">
+            <p>1Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestias molestiae atque quis blanditiis eaque maiores ducimus optio neque debitis quos dolorum odit unde quibusdam tenetur quaerat magni eius quod tempore.</p>
+            <button onclick="change($('.tabBlock-tabs'))">qiehuan</button>
+        </div>
+        <div class="tabBlock-pane">
+            <ul>
+                <li>2Lorem ipsum dolor sit amet.</li>
+                <li>Minima mollitia tenetur nesciunt modi?</li>
+                <li>Id sint fugit et sapiente.</li>
+                <li>Nam deleniti libero obcaecati pariatur.</li>
+                <li>Nemo optio iste labore similique?</li>
+            </ul>
+            <button onclick="change($('.tabBlock-tabs'))">qiehuan</button>
+        </div>
+        <div class="tabBlock-pane">
+            <ul>
+                <li>3Lorem ipsum dolor sit amet.</li>
+                <li>Minima mollitia tenetur nesciunt modi?</li>
+                <li>Id sint fugit et sapiente.</li>
+                <li>Nam deleniti libero obcaecati pariatur.</li>
+                <li>Nemo optio iste labore similique?</li>
+            </ul>
+            <button onclick="change($('.tabBlock-tabs'))">qiehuan</button>
+        </div>
+    </div>
+</figure>
+<div style="text-align:center;clear:both">
+    <script src="/gg_bd_ad_720x90.js" type="text/javascript"></script>
+    <script src="/follow.js" type="text/javascript"></script>
+</div>
+<script src='../css3-simple-tab/js/jquery.js'></script>
+<script src="../css3-simple-tab/js/index.js"></script>
+</body>
+</html>

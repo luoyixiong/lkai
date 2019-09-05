@@ -1,0 +1,27 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>任务分配</title>
+</head>
+<body>
+<link rel="stylesheet" type="text/css" href="{% static 'css/table.css' %}"/>
+<!-- Table goes in the document BODY -->
+<table class="grid_table">
+<tr>
+	<th>用户名</th><th>完成/任务</th><th>操作</th>
+</tr>
+<tr>
+	<td>马江微</td>
+    <td>1/2000</td>
+    <td><a><button>分配任务</button></a><a><button>减少任务</button></a></td>
+</tr>
+
+</table>
+
+</body>
+</html>
+{% endblock %}

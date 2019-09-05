@@ -1,0 +1,273 @@
+{% load static %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+    <meta charset="UTF-8" content="">
+    <title>校验系统</title>
+    <link rel="stylesheet" href="{%static '/css3-simple-tab/css/normalize.css'%}">
+    <link rel="stylesheet" href="{%static '/css3-simple-tab/css/style.css'%}" media="screen" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="{%static 'dist/css/bootstrap.min.css'%}">
+    <script type="" src="http://static.runoob.com/assets/jquery-validation-1.14.0/lib/jquery.js"></script>
+    <script type="" src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
+    <script  type="" src="{%static 'dist/jquery-3.4.1.js'%}"></script>
+    <script type="" src="{%static 'dist/js/bootstrap.min.js'%}"></script>
+    <link href="{%static 'dist/css/layoutit.css'%}" rel="stylesheet">
+    <link href="{%static 'dist/css/bootstrap-combined.min.css'%}" rel="stylesheet">
+    <script type="" src="{%static 'js/initialization.js'%}"></script>
+    <script src="{%static 'js/tools.js'%}" type=""></script>
+    <script type="">
+        $(".selector").validate({
+            submitHandler: function(form)
+            {
+                $(form).ajaxSubmit();
+            }
+        })
+    </script>
+    <script type="">
+        {#let tabs=["名称","指标信息","指标意义","检查须知","实验室相关"];#}
+        {#let contents = new Array(new Array("报告名称&ensp;&ensp;&ensp;", "首字母缩写&ensp;", "别&ensp;&ensp;&ensp;&ensp;称&ensp;&ensp;&ensp;", "英文名称&ensp;&ensp;&ensp;", "英文缩写&ensp;&ensp;&ensp;", "大红本编码&ensp;"),#}
+        {#    new Array("定义&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;", "科室归类&ensp;&ensp;&ensp;", "人群划分&ensp;&ensp;&ensp;", "检查归类&ensp;&ensp;&ensp;", "是否空腹&ensp;&ensp;&ensp;", "参考价格&ensp;&ensp;&ensp;", "适宜人群&ensp;&ensp;&ensp;", "不适宜人群&ensp;", "何时检测&ensp;&ensp;&ensp;", "何地检测&ensp;&ensp;&ensp;", "出单时间&ensp;&ensp;&ensp;"),#}
+        {#    new Array("临床意义&ensp;&ensp;&ensp;", "参考范围&ensp;&ensp;&ensp;", "结果解读&ensp;&ensp;&ensp;", "相关疾病&ensp;&ensp;&ensp;", "相关症状&ensp;&ensp;&ensp;", "建议与指导&ensp;"),#}
+        {#    new Array("检查过程&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;", "检查注意事项&ensp;&ensp;&ensp;", "不良反应与风险&ensp;"),#}
+        {#    new Array("检测方法&ensp;", "样本要求&ensp;", "采样要求&ensp;", "保存条件&ensp;", "拒收标准&ensp;")#}
+        {#);#}
+
+    </script>
+    <style type="">
+        #hint{
+            position:absolute;
+            float:left;
+            display:none;
+            width:180px;
+            height: auto;
+            padding:5px;
+            cursor:pointer;
+            background:white;
+            font-size: 16px;
+            color:black;
+            border:1px solid #ccc;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body >
+<script type="">
+    document.getElementById('finishedNumber').innerText='';
+    document.getElementById('all').innerText='';
+    document.getElementById('unfinishNumber').innerText='';
+    document.getElementById('doubt').innerText='';
+</script>
+
+<script type="">
+    function submit($tab) {
+        {#var oldPassword = $("#texta").val();#}
+        {#console.log("oldPassword")#}
+        {#console.log(oldPassword)#}
+        change($tab);
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "./insert/?num="+$atab.index() ,//url
+            data: $('#form'+$atab.index()).serialize(),
+            success: function (result) {
+                if (result.status) {
+                    {#alert("success");#}
+                    {#change($tab);#}
+                }
+            },
+            error : function() {
+                alert("异常！");
+            }
+        });
+        //$atab=$tab.find('.tabBlock-tab.is-active');
+        // if($atab.index()==4){
+        //     window.location.reload();
+        // }
+
+    }
+    function change($tab) {
+        $atab=$tab.find('.tabBlock-tab.is-active');
+        $tabBlock=$('.tabBlock');
+        $panes = $tabBlock.find('.tabBlock-pane');
+        $activeTab = $tabBlock.find('.tabBlock-tab.is-active');
+        $panes.hide();
+        $($panes[$activeTab.index()]).show();
+        var $context = $atab.next().closest('.tabBlock');
+
+        if (!$atab.next().hasClass('is-active')) {
+            $atab.next().siblings().removeClass('is-active');
+            $atab.next().addClass('is-active');
+            TabBlock.showPane($atab.next().index(), $context);
+        }
+        if($atab.next().index()===4){
+            document.getElementById('next').innerText='完成';
+            document.getElementById('next').onclick=function ( ) {
+                submit($tab);
+                //alert("yyyyy")
+                window.location.reload();
+            }
+            //searchItem()
+        }
+        // $activeTab = $tab.find('.tabBlock-tab.is-active');
+        // alert($activeTab.index())
+        //submit($atab.index());
+    }
+</script>
+<script>
+ 		window.onload=function(){
+ 			//获取文本输入框
+ 			var textElment = document.getElementById("searchBox");
+ 			//获取下提示框
+ 			var div = document.getElementById("tips");
+ 			textElment.onkeyup=function(){
+ 				//获取用户输入的值
+ 				var text = textElment.value;
+ 				//如果文本框中没有值，则下拉框被隐藏，不显示
+ 				if(text===""){
+ 					div.style.display="none";
+ 					return;
+ 				}
+ 				//获取XMLHttpRequest对象
+ 				var xhr = new XMLHttpRequest();
+ 				//编写回调函数
+ 				xhr.onreadystatechange=function(){
+ 					//判断回调的条件是否准备齐全
+ 					if(xhr.readyState==4){
+ 						if(xhr.status==200){
+ 							//取的服务器端传回的数据
+ 							var str = xhr.responseText;
+
+ 							//判断传回的数据是否为空,若是则直接返回，不显示
+ 							if(str==""){
+ 								return;
+ 							}
+ 							//我们将会在服务器端把数据用 , 隔开，当然这里也可以使用json
+ 							var result = str.split(",");
+ 							var childs = "";
+ 							//遍历结果集，将结果集中的每一条数据用一个div显示，把所有的div放入到childs中
+ 							for(var i=0; i<result.length;i++){
+ 								childs += "<div onclick='Write(this)' onmouseout='recoverColorwhenMouseout(this)' onmouseover='changeColorwhenMouseover(this)'>"+result[i]+"</div>";
+ 							}
+ 							//把childs 这div集合放入到下拉提示框的父div中，上面我们以获取了
+ 							div.innerHTML=childs;
+ 							div.style.display="block";
+
+ 						}
+ 					}
+ 				}
+
+ 				//创建与服务器的连接
+ 				xhr.open("GET","../f_search?text="+text);
+
+
+ 				//发送
+ 				xhr.send();
+ 			}
+ 		}
+ 		//鼠标悬停时改变div的颜色
+ 		function changeColorwhenMouseover(div){
+ 			div.style.backgroundColor="pink";
+ 		}
+ 		//鼠标移出时回复div颜色
+ 		function recoverColorwhenMouseout(div){
+ 			div.style.backgroundColor="";
+ 		}
+ 		//当鼠标带点击div时，将div的值赋给输入文本框
+ 		function Write(div){
+ 			//将div中的值赋给文本框
+ 			document.getElementById("searchBox").value=div.innerHTML;
+
+ 			//让下拉提示框消失
+
+ 			div.parentNode.style.display="none";
+ 		}
+ 	</script>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span12">
+            <ul class="breadcrumb">
+                <li>
+                    <a href="#">指标</a> <span class="divider">/</span>
+                </li>
+                <li>
+                    <a href="#">疾病</a> <span class="divider">/</span>
+                </li>
+                <li class="active">
+                    症状
+                </li>
+            </ul>
+            <div class="row-fluid">
+                <div class="span4">
+                    <span class="label badge-success">已完成：</span>
+                    &thinsp;
+                    <u id="finishedNumber">20</u>
+                    <span>/</span>
+                    <u id="all">80</u>
+                    &emsp;&emsp;
+                    <span class="label badge-warning">待完成：</span>
+                    &thinsp;
+                    <u id="unfinishNumber">60</u>
+                    &emsp;&emsp;
+                    <span class="label">存疑：</span>
+                    &thinsp;
+                    <u id="doubt">0</u>
+                    <span id="userName" style="float: right">admin</span>
+                </div>
+                <div  class="span4">
+
+                    <div style="float: right" class="form-search" id="search_form">
+{#                        <input  id='searchBox'class="input-medium search-query"  autocomplete="off" onkeyup="showHint(this.value)" type="text" style="width: 180px;height: 30px"/> <button class="btn" type="button" onclick="searchItem()">查找</button>#}
+{#                        <div id="hint" style=""></div>#}
+                        <input  id='searchBox'class="input-medium search-query"  autocomplete="off" type="text" style="width: 180px;height: 30px"/> <button class="btn" type="button" onclick="searchItem_s()">查找</button>
+                        <div id="tips" style="display: none; width: 171px; border: 1px solid pink">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="span2">
+                    <select id="sel">
+                        <option value="finished">已完成</option>
+                        <option value="unfinish">未完成</option>
+                        <option value="unsure">存疑</option>
+                    </select>
+                </div>
+            </div>
+
+                </div>
+            </div>
+        </div>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span12">
+            <div class="row-fluid">
+<!--            <h5 >指标名称：</h5>-->
+            <h5 id="itemName"></h5>
+            </div>
+        </div>
+    </div>
+</div>
+<figure class="tabBlock">
+    <ul class="tabBlock-tabs" id="tabs">
+        <!-- 初始化导航栏信息-->
+        <script>
+            document.getElementById('tabs').innerHTML=loadTab(tabs);
+            //document.getElementById('contents').innerHTML='<p>hhhhhh</p>';
+        </script>
+    </ul>
+    <div class="tabBlock-content" id="contents">
+        <!--初始化导航栏内容        -->
+        <script type="">
+           // document.getElementById("contents").innerHTML=loadTabContents(tabs,contents,values);
+            searchItem();
+        </script>
+    </div>
+</figure>
+<div style="text-align:center;clear:both">
+
+</div>
+<script src="{%static 'css3-simple-tab/js/jquery.js'%}"></script>
+<script src="{%static 'css3-simple-tab/js/index.js'%}"></script>
+</body>
+</html>

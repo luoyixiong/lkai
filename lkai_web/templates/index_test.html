@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8"/>
+<body>
+    <div style="margin-top: 300px;margin-left: 520px;">
+        <form action="/search/" method="post" style="margin: auto 0;">
+            请输入指标名称：<br/>
+            <label for="search-text"></label><input type="text" id="search-text" name="q">
+            <button type="button" id='search-button'>搜索</button>
+            <p><span id='search-result'></span></p>
+        </form>
+    </div>
+<script src="http://apps.bdimg.com/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $("#search-text").keyup(function(){
+            let q = $("#search-text").val();
+            let category=$("#sel").val();
+            {#var str=document.getElementById('searchBox').value;#}
+            {#var category=document.getElementById('sel').value;#}
+            $.get("/f_search/",{'q':q,'category':category}, function(data){
+                for (let i = data.length - 1; i >= 0; i--) {
+                    $('#search-result').append(data[i]+'<br/>')
+                }
+            })
+        });
+        $('#search-text').keydown(function(){
+            $('#search-result').empty();
+        });
+        $('#search-text').blur(function(){
+            $('#search-result').empty();
+        })
+    });
+</script>
+</body>
+</html>

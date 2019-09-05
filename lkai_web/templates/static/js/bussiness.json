@@ -1,0 +1,53 @@
+{
+  "name": [
+    {
+      "rname":"01",
+      "abbr": "Java",
+      "aname": "third",
+      "ename": "Herbert Schildt",
+      "eabbr": "Herbert Schildt",
+      "redencode": "codecode",
+      "doubt": "1,2,3"
+    }],
+  "itemInfo": [
+    {
+      "dy":"01",
+      "ksgl": "Java",
+      "rqhf": "third",
+      "jcgl": "Herbert Schildt",
+      "sfkf": "Herbert Schildt",
+      "ckjg": "codecode",
+      "syrq": "Java",
+      "bsyrq": "third",
+      "hsjc": "Herbert Schildt",
+      "hdjc": "Herbert Schildt",
+      "cdsj": "codecode",
+      "doubt": "1,2,3,4"
+    }],
+  "itemmeanings": [
+    {
+      "rname":"01",
+      "abbr": "Java",
+      "aname": "third",
+      "ename": "Herbert Schildt",
+      "eabbr": "Herbert Schildt",
+      "redencode": "codecode",
+      "doubt": "1,2,3,5"
+    }],
+  "checkInfo": [
+    {
+      "rname":"01",
+      "abbr": "Java",
+      "aname": "third",
+      "doubt": "1,2"
+    }],
+  "labInfo": [
+    {
+      "rname":"01",
+      "abbr": "Java",
+      "aname": "third",
+      "ename": "Herbert Schildt",
+      "eabbr": "Herbert Schildt",
+      "doubt": "2,3"
+    }]
+}

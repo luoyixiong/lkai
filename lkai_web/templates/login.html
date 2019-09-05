@@ -1,0 +1,25 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>校验登录页面</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!--<meta name="keywords" content="Boundary Sign in Form template Responsive, Login form web template,Flat Pricing tables,Flat Drop downs  Sign up Web Templates, Flat Web Templates, Login sign up Responsive web template, SmartPhone Compatible web template, free WebDesigns for Nokia, Samsung, LG, Sony Ericsson, Motorola web design" />-->
+<link href="{% static 'css/style.css'%}" rel="stylesheet" type="text/css" media="all" />
+</head>
+<body>
+	<h1></h1>
+		<div class="login-form w3-agile">
+			<h2>登录</h2>
+			<form id='login' action="/login/" method="post">
+					<p>用户名</p>
+					<input type="text" name="username" placeholder=" " required="" />
+					<p>密码</p>
+					<input type="password" name="password" placeholder="" required="" />
+					<input type="submit" value="进入">
+			</form>
+		</div>
+
+</body>
+</html>
