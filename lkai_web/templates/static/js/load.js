@@ -43,6 +43,7 @@ function loadContent() {
     xmlhttp.open("GET",'./bussiness2',true);//传送类别及搜索内容
     xmlhttp.send();
 }
+
 function analyzingStrus(json) {
     var html='';
     var eid_value='';
@@ -272,9 +273,12 @@ function sendStatus() {
     xmlhttp.open("GET",'new.json',true);//发送一个url来改变数据状态
     xmlhttp.send();
 }
+
 function getNextData() {
     window.location.reload();
 }
+
+
 function getUserInfo() {
     //获取用户基本信息
     var xmlhttp;

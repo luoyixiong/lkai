@@ -30,7 +30,7 @@ enumPropDic = {
              '其他': [],
              },
     '人群划分': ['男性', '女性', '老人', '儿童'],
-    '是否空腹': ['是','否'],
+    '是否空腹': ['是', '否'],
 }
 
 tagPropDic = ['相关疾病', '相关症状', '建议与指导']
@@ -51,6 +51,7 @@ formCheckList = [False] * 5
 # 获得属性对应的数据
 def getProp(request):
     global prop_list, prop_list_new
+
     result = ''
     propid = request.GET.get('propid')
     datatype = request.GET.getlist('datatype')[0]
@@ -58,11 +59,21 @@ def getProp(request):
     if datatype == 'new':
         if propid in prop_list_new:
             result = prop_list_new[propid]
+            subpropid = request.GET.get('subpropid')
+            if subpropid is not None:
+                if subpropid in result:
+                    result = result[subpropid]
+                else:
+                    result = ''
     elif datatype == 'old':
         if propid in prop_list:
             result = prop_list[propid]
-
-    return HttpResponse(result)
+    if isinstance(result, str):
+        return HttpResponse(result)
+    elif isinstance(result, list):
+        return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),content_type='application/json')
+    else:
+        return HttpResponse(status=404)
 
 
 # 处理客户端提交的数据
@@ -74,9 +85,11 @@ def getEdit(request):
         name = request.session.get("username_check")
         formIndex = propList[-1]
         print('formIndex: ', formIndex)
+
         for prop in propList[:-1]:
             if len(prop) > 0:
-                #print(prop)
+                print(prop)
+
                 propVal = prop['value']
                 propID = prop['propid']
                 eid = prop['eid']
@@ -90,7 +103,9 @@ def getEdit(request):
                         if len(zhibiao) == 1:
                             preObjid = zhibiao[0].prop_value
                         objid = str(time.time())
-                        PropertyDataNew.objects.update_or_create(EID=eid, PROPID=propID, defaults={'doubt':prop['ischecked'],'prop_value': objid,'ownuser': name})
+                        PropertyDataNew.objects.update_or_create(EID=eid, PROPID=propID,
+                                                                 defaults={'doubt': prop['ischecked'],
+                                                                           'prop_value': objid, 'ownuser': name})
 
                         parsePropDic(propVal, preObjid, objid, eid, prop['ischecked'], name)
 
@@ -98,7 +113,7 @@ def getEdit(request):
                         # print(propVal)
                         PropertyDataNew.objects.update_or_create\
                             (EID=eid, PROPID=propID, defaults={'doubt': prop['ischecked'],
-                                                              'prop_value': propVal, 'ownuser': name})
+                                                               'prop_value': propVal, 'ownuser': name})
                     # 参考范围
                     elif isinstance(propVal, list):
                         CKFW = PropertyDataNew.objects.filter(EID=eid, PROPID=propID)
@@ -106,18 +121,17 @@ def getEdit(request):
                         CKFW.delete()
                         for historyObi in historyObiList:
                             PropertyDataNew.objects.filter(EID=eid, objid=historyObi).delete()
-                        print(propVal)
+
                         for itemDic in propVal:
                             values = list(itemDic.values())
-                            print(values)
+
                             objid = str(time.time())
-                            PropertyDataNew.objects.create(EID=eid, PROPID=propID,doubt=prop['ischecked'],
-                                                                               prop_value= objid, ownuser= name)
+                            PropertyDataNew.objects.create(EID=eid, PROPID=propID, doubt=prop['ischecked'],
+                                                           prop_value=objid, ownuser=name)
                             subPropidList = ['lkai.prop.性别', 'lkai.prop.年龄段', 'lkai.prop.范围']
                             for index, subPropid in enumerate(subPropidList):
                                 PropertyDataNew.objects.create(EID=eid, PROPID=subPropid, doubt=prop['ischecked'],
                                                                ownuser=name, objid=objid, prop_value=values[index])
-
                     else:
                         print(type(prop['value']), prop['value'])
         if formIndex == 5:
@@ -136,25 +150,26 @@ def getEdit(request):
     return HttpResponse(status=404)
 
 
-def parsePropDic(propDic,preObjid,objid,eid,ischecked,name):
+def parsePropDic(propDic, preObjid, objid, eid, ischecked, name):
     for dic in propDic.values():
         propID = dic['propid']
         value = dic['value']
         if isinstance(value, str):
             if preObjid != '':
-                print('preObjid', preObjid)
+
                 PropertyDataNew.objects.update_or_create(EID=eid, PROPID=propID, objid=preObjid,
-                                                    defaults={'doubt': ischecked, 'prop_value': value, 'ownuser': name,
-                                                            'objid':objid,})
+                                                         defaults={'doubt': ischecked, 'prop_value': value,
+                                                                   'ownuser': name,
+                                                                   'objid': objid, })
             else:
                 PropertyDataNew.objects.update_or_create(EID=eid, PROPID=propID, objid=objid,
                                                          defaults={'doubt': ischecked, 'prop_value': value,
                                                                    'ownuser': name, })
         # elif isinstance(value, dict):
-            # subObjid = str(time.time())
-            # PropertyDataNew.objects.update_or_create(EID=eid, PROPID=propID, objid=objid,
-            #                                         defaults={'doubt': ischecked, 'prop_value': subObjid, 'ownuser': name})
-            # parsePropDic(value, subObjid, eid, ischecked, name)
+        # subObjid = str(time.time())
+        # PropertyDataNew.objects.update_or_create(EID=eid, PROPID=propID, objid=objid,
+        #                                         defaults={'doubt': ischecked, 'prop_value': subObjid, 'ownuser': name})
+        # parsePropDic(value, subObjid, eid, ischecked, name)
 
 
 # 返回用户已校验过的信息
@@ -163,9 +178,19 @@ def getUserInfo(request):
 
     userName = request.session['username_check']
     userDic['userName'] = userName
-    userDic['itemName'] = request.session['eid']
-    finished = Entity.objects.filter(check_name=userName, check=1)
     unfinished = Entity.objects.filter(check_name=userName, check=0)
+    if len(unfinished) > 0:
+        if request.session.get('eid') is None:
+            eid = unfinished[0].EID
+            request.session['eid'] = eid
+
+    else:
+        return render(request, 'index_test.html')
+    eid = request.session['eid']
+    userDic['itemName'] = eid
+
+    finished = Entity.objects.filter(check_name=userName, check=1)
+
     userDic['finished'] = len(finished)
     userDic['unfinished'] = len(unfinished)
     userDic['all'] = userDic['finished'] + userDic['unfinished']
@@ -191,102 +216,112 @@ def getUserInfo(request):
                         content_type='application/json')
 
 
-# def getPropList(EID):
-#     prop_list ={}
-#     oldProps = PropertyData.objects.filter(EID=EID)
-#     for prop in oldProps:
-#         if prop.PROPID in prop_list:
-#
-#         else:
-#
-#
-# def getSinglePropStr(prop:PropertyData, EID, propID, inList=False):
-#
-#         if is_number(prop.prop_value):
-#             subProps = PropertyData.objects.filter(EID=EID, objid=prop.prop_value)
-#             prop_list[prop.PROPID] += prop.origin + '</br>'
-#             for subProp in enumerate(subProps):
-#                 prop_list[prop.PROPID] += prop.PROPID.split('.')[-1] + '</br>'
-#                 value = prop.prop_value
-#                 while is_number(value):
-#                     prop_list[prop.PROPID] += prop.PROPID.split('.')[-1] + '</br>'
-#
-#         else:
-#             prop_list[prop.PROPID] += prop.origin + ':' + prop.prop_value + '</br>'
+def getPropList(EID):
+    result = {}
+
+    oldProps = PropertyData.objects.filter(EID=EID, objid=None)
+
+    for prop in oldProps:
+
+        if prop.PROPID in result:
+            result[prop.PROPID] += prop.origin + '\n'
+        else:
+            result[prop.PROPID] = prop.origin + '\n'
+        getSingleProp(prop, EID, prop.PROPID, result)
+        result[prop.PROPID] += '\n'
+    return result
+
+
+def getSingleProp(prop: PropertyData, EID, propID, p_list, layer=1):
+
+    if is_number(prop.prop_value):
+        subProps = PropertyData.objects.filter(EID=EID, objid=prop.prop_value)
+
+        if layer > 1:
+            p_list[propID] += prop.PROPID.split('.')[-1] + '\n'
+        for subProp in subProps:
+            getSingleProp(subProp, EID, propID, p_list, layer + 1)
+
+    else:
+        if layer == 1:
+            p_list[propID] += prop.prop_value + '\n'
+        else:
+            p_list[propID] += prop.PROPID.split('.')[-1] + '\n' + prop.prop_value + '\n'
+
+
+def getPropListNew(EID):
+    result = {}
+    newProps = PropertyDataNew.objects.filter(EID=EID, objid=None)
+
+    for prop in newProps:
+        propName = prop.PROPID.split('.')[-1]
+
+        if prop.PROPID in result:
+            # result[prop.PROPID].append(getSinglePropNew(EID, prop.prop_value))
+            temp = getSinglePropNew(EID, prop.prop_value)
+            result[prop.PROPID].append( [ temp[item] if item in temp else '' for item in listType[propName]] )
+        else:
+            if is_number(prop.prop_value):
+                if prop.PROPID.split('.')[-1] in listType:
+                    temp = getSinglePropNew(EID, prop.prop_value)
+                    result[prop.PROPID]= [[temp[item] if item in temp else '' for item in listType[propName]]]
+                    # result[prop.PROPID] = [getSinglePropNew(EID, prop.prop_value)]
+                else:
+                    result[prop.PROPID] = getSinglePropNew(EID, prop.prop_value)
+            else:
+                result[prop.PROPID] = prop.prop_value
+
+    return result
+
+
+def getSinglePropNew(EID, objid):
+    result = {}
+    subProps = PropertyDataNew.objects.filter(EID=EID, objid=objid)
+    for subProp in subProps:
+        subPropName = subProp.PROPID.split('.')[-1]
+        if is_number(subProp.prop_value):
+            result[subPropName] = getSinglePropNew(EID, subProp.prop_value)
+        else:
+            result[subPropName] = subProp.prop_value
+
+    return result
 
 
 def bussiness2(request):
     global prop_list, prop_list_new
-    prop_list = {}
-    prop_list_new = {}
-    user_name = request.session.get("username_check")
-    #userList =
-    globalEID = Entity.objects.filter(check_name=user_name, check=False)[0]
-    request.session['eid'] = globalEID.EID
-    print(globalEID.EID)
 
-    oldProps = PropertyData.objects.filter(EID=globalEID)
-    for prop in oldProps:
-        if prop.PROPID in prop_list:
-            prop_list[prop.PROPID] += prop.origin + ':' + prop.prop_value + '</br>'
-        else:
-            prop_list[prop.PROPID] = prop.origin + ':' + prop.prop_value + '</br>'
-    newProps = PropertyDataNew.objects.filter(EID=globalEID)
+    userName = request.session.get('username_check')
 
-    for prop in newProps:
-        if prop.PROPID in prop_list_new:
-            print('属性重复')
-        else:
-            prop_list_new[prop.PROPID] = prop.prop_value
+    EID = request.session.get('eid')
+    if EID is None:
+        EID = Entity.objects.filter(check_name=userName, check=0)[0].EID
+        request.session['eid'] = EID
+    prop_list = getPropList(EID)
+    prop_list_new = getPropListNew(EID)
 
-    result = genDefJson(globalEID.EID)
+    result = genDefJson(EID)
 
     return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),
                         content_type='application/json')
 
 
-def test(request):
+def test2(request):
     # result = getAllPropDataDic('lkai.ent.低密度脂蛋白胆固醇', 'lkai.prop.结果解读')
-
-    result = genDefJson('lkai.ent.可的松水试验')
-    #result = PropertyData.objects.filter(EID='lkai.ent.可的松水试验',PROPID='lkai.prop.结果解读')
+    #result = genDefJson('lkai.ent.低密度脂蛋白胆固醇')
+    result = getPropListNew('lkai.ent.骨髓各系细胞形态学检查')
+    # result = PropertyData.objects.filter(EID='lkai.ent.可的松水试验',PROPID='lkai.prop.结果解读')
 
     return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),
                         content_type='application/json')
 
 
-# def genDefJson(EID):
-#     result = {'EID': EID, 'name': EID.split('.')[-1],
-#               'DEF_1': [], 'DEF_2': [], 'DEF_3': [], 'DEF_4': [], 'DEF_5': [], }
-#
-#     # 属性分为5组，分组信息在tag_list中
-#     for index, tags in enumerate(tag_list):
-#         listName = 'DEF_' + str(index + 1)
-#         for tag in tags:
-#             # 每个属性对应一个字典
-#             propDic = {'propid': tag, 'name': tag.split('.')[-1]}
-#             # 可选类型
-#             if propDic['name'] in enumPropDic:
-#                 propDic['type'] = 'select'
-#                 propDic['enum_list'] = enumPropDic[propDic['name']]
-#             #
-#             elif propDic['name'] in listType:
-#                 propDic['type'] = 'list'
-#                 propDic['num'] = len(PropertyDataNew.objects.filter(EID=EID,PROPID=tag))
-#             # 组合类型
-#             elif propDic['name'] in objectType:
-#                 propDic['type'] = 'object'
-#                 propDic['fields'] = objectType[propDic['name']]
-#             # 字符串类型
-#             else:
-#                 propDic['type'] = 'string'
-#
-#             result[listName].append(propDic)
-#     return result
+# def test(request):
+#     template_data = {'tabNames': ["名称", "指标信息", "指标意义", "检查须知", "实验室相关"]}
+#     result = genDefJson('lkai.ent.低密度脂蛋白胆固醇')
+#     template_data['defs'] = [result['DEF_1'],result['DEF_2'],result['DEF_3'],result['DEF_4'],result['DEF_5']]
+#     return render(request, 'index_templates.html', template_data)
 
 
-# 生成完整的json，包含所有属性的结构
-# 除object类型属性的结构外，其他属性
 def genDefJson(EID):
     result = {'EID': EID, 'name': EID.split('.')[-1],
               'DEF_1': [], 'DEF_2': [], 'DEF_3': [], 'DEF_4': [], 'DEF_5': [], }
@@ -301,21 +336,18 @@ def genDefJson(EID):
             if propDic['name'] in enumPropDic:
                 propDic['type'] = 'select'
                 propDic['enum_list'] = enumPropDic[propDic['name']]
-            # 前端要求
-            elif propDic['name'] in tagPropDic:
-                propDic['type'] = 'tag'
+            #
+            elif propDic['name'] in listType:
+                propDic['type'] = 'list'
+                num = len(PropertyDataNew.objects.filter(EID=EID, PROPID=tag))
+                if num == 0:
+                    propDic['num'] = 1
+                else:
+                    propDic['num'] = num
             # 组合类型
             elif propDic['name'] in objectType:
                 propDic['type'] = 'object'
-                prop = PropertyData.objects.filter(EID=EID, PROPID=propDic['propid'])
-                fields = []
-                for item in objectType[propDic['name']]:
-                    fields.append({'propid': ('lkai.prop.' + item), 'name': item, 'type': 'string'})
-                propDic['fields_new'] = fields
-                if len(prop) > 0:
-                    propDic['fields_old'] = getPropDefDic(prop[0])['fields']
-                else:
-                    propDic['fields_old'] = fields
+                propDic['fields'] = objectType[propDic['name']]
             # 字符串类型
             else:
                 propDic['type'] = 'string'
@@ -324,26 +356,65 @@ def genDefJson(EID):
     return result
 
 
-def getPropDefDic(prop: PropertyData):
-    definition = {'propid': prop.PROPID,
-                  'name': prop.PROPID.split('.')[-1], }
-    # 属性的类型判断
-    #   可选类型，对应下拉框
-    if definition['name'] in enumPropDic:
-        definition['type'] = 'select'
-        definition['enum'] = enumPropDic[definition['name']]
-    else:
-        subProps = PropertyData.objects.filter(objid=prop.prop_value)
-        # 复合类型，对应有子属性
-        if len(subProps) > 0:
-            definition['type'] = 'object'
-            subDef = [getPropDefDic(subProp) for subProp in subProps]
-            definition['fields'] = subDef
-        # 字符串类型
-        else:
-            definition['type'] = 'string'
+# 生成完整的json，包含所有属性的结构
+# 除object类型属性的结构外，其他属性
+# def genDefJson(EID):
+#     result = {'EID': EID, 'name': EID.split('.')[-1],
+#               'DEF_1': [], 'DEF_2': [], 'DEF_3': [], 'DEF_4': [], 'DEF_5': [], }
+#
+#     # 属性分为5组，分组信息在tag_list中
+#     for index, tags in enumerate(tag_list):
+#         listName = 'DEF_' + str(index + 1)
+#         for tag in tags:
+#             # 每个属性对应一个字典
+#             propDic = {'propid': tag, 'name': tag.split('.')[-1]}
+#             # 可选类型
+#             if propDic['name'] in enumPropDic:
+#                 propDic['type'] = 'select'
+#                 propDic['enum_list'] = enumPropDic[propDic['name']]
+#             # 前端要求
+#             elif propDic['name'] in tagPropDic:
+#                 propDic['type'] = 'tag'
+#             # 组合类型
+#             elif propDic['name'] in objectType:
+#                 propDic['type'] = 'object'
+#                 prop = PropertyData.objects.filter(EID=EID, PROPID=propDic['propid'])
+#                 fields = []
+#                 for item in objectType[propDic['name']]:
+#                     fields.append({'propid': ('lkai.prop.' + item), 'name': item, 'type': 'string'})
+#                 propDic['fields_new'] = fields
+#                 if len(prop) > 0:
+#                     propDic['fields_old'] = getPropDefDic(prop[0])['fields']
+#                 else:
+#                     propDic['fields_old'] = fields
+#             # 字符串类型
+#             else:
+#                 propDic['type'] = 'string'
+#
+#             result[listName].append(propDic)
+#     return result
 
-    return definition
+
+# def getPropDefDic(prop: PropertyData):
+#     definition = {'propid': prop.PROPID,
+#                   'name': prop.PROPID.split('.')[-1], }
+#     # 属性的类型判断
+#     #   可选类型，对应下拉框
+#     if definition['name'] in enumPropDic:
+#         definition['type'] = 'select'
+#         definition['enum'] = enumPropDic[definition['name']]
+#     else:
+#         subProps = PropertyData.objects.filter(objid=prop.prop_value)
+#         # 复合类型，对应有子属性
+#         if len(subProps) > 0:
+#             definition['type'] = 'object'
+#             subDef = [getPropDefDic(subProp) for subProp in subProps]
+#             definition['fields'] = subDef
+#         # 字符串类型
+#         else:
+#             definition['type'] = 'string'
+#
+#     return definition
 
 
 def check_login(f):
@@ -359,7 +430,7 @@ def check_login(f):
 
 @check_login
 def index(request):
-    return render(request, "index.html")
+    return render( request,"index.html")
 
 
 def insert_quota(request):
@@ -1365,6 +1436,7 @@ def login(request):
             request.session.clear()
             request.session['is_login'] = '1'
             request.session['username_check'] = username
+
             return redirect('/index/')
     return render(request, 'login.html')
 

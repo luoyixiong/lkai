@@ -8,33 +8,31 @@
     <link rel="stylesheet" href="{%static '/css3-simple-tab/css/normalize.css'%}">
     <link rel="stylesheet" href="{%static '/css3-simple-tab/css/style.css'%}" media="screen" type="text/css" />
     <link rel="stylesheet" type="text/css" href="{%static '/dist/css/bootstrap.min.css'%}">
-{#    <script src="http://static.runoob.com/assets/jquery-validation-1.14.0/lib/jquery.js"></script>#}
+
     <script src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
     <script src="{%static '/dist/jquery-3.4.1.js'%}"></script>
-{#    <script src="{%static '/dist/js/bootstrap.min.js'%}"></script>#}
+
     <link href="{%static '/dist/css/layoutit.css'%}" rel="stylesheet">
     <link href="{%static '/dist/css/bootstrap-combined.min.css'%}" rel="stylesheet">
     <script src="{%static '/css3-simple-tab/js/jquery.js'%}"></script>
     <script src="{%static '/css3-simple-tab/js/index.js'%}"></script>
-    <script src="{%static '/js/load.js'%}"></script>
+{#    <script src="{%static '/js/load.js'%}"></script>#}
+    <script src="{%static '/js/loadStructure.js'%}"></script>
+    <script src="{%static '/js/submit.js'%}"></script>
+    <script src="{%static '/js/tools.js'%}"></script>
     <script type="text/javascript" src="{%static '/js/chosen.jquery.min.js'%}"></script>
     <script type="text/javascript" src="{%static '/js/chosen.jquery.js'%}"></script>
     <link rel="stylesheet" type="text/css" href="{%static '/css/chosen.min.css'%}">
     <link rel="stylesheet" type="text/css" href="{%static '/css/chosen.css'%}">
-<!--    <link href="bootstrap.css" rel="stylesheet">-->
-<!--    <link href="tagsinput.css" rel="stylesheet">-->
-<!--    <script src="dist/jquery-3.4.1.js"></script>-->
-<!--    <script src="dist/js/bootstrap.min.js"></script>-->
-<!--    <script src="typehead.min.js"></script>-->
-<!--    <script src="tagsinput.js"></script>-->
+
     <script src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
     <script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="http://cdn.bootcss.com/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.min.js"></script>
     <script src="http://cdn.bootcss.com/typeahead.js/0.11.1/typeahead.bundle.js"></script>
-<!--    <link href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet">-->
-    <link href="http://cdn.bootcss.com/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css" rel="stylesheet">
+   <link href="http://cdn.bootcss.com/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css" rel="stylesheet">
 </head>
 <body>
+
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span12">
@@ -66,6 +64,7 @@
                     <u id="doubt"></u>
                     <span id="userName" style="float: right"></span>
                 </div>
+
                 <div  class="span4">
 
                     <div style="float: right" class="form-search" id="search_form">
@@ -75,6 +74,7 @@
                     </div>
 
                 </div>
+
                 <div class="span2">
                     <select id="sel">
                         <option value="finished">已完成</option>
@@ -91,6 +91,7 @@
         </div>
     </div>
 </div>
+
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span12">
@@ -101,6 +102,7 @@
         </div>
     </div>
 </div>
+
 <figure class="tabBlock"  >
     <ul class="tabBlock-tabs" id="tabs">
 
@@ -108,10 +110,13 @@
     <div  class="tabBlock-content" id="contents">
     </div>
 </figure>
+
 <script>
-    getUserInfo();
     loadTab();//初始化导航栏名称
-    loadContent();//初始化导航栏内容
+
+    getUserInfo();
+    loadStru();
 </script>
+
 </body>
 </html>

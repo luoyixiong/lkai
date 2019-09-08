@@ -30,15 +30,29 @@ var TabBlock = {
   
   switchTab: function($tab) {
     var $context = $tab.closest('.tabBlock');
-    // alert($tab.index())
-    // alert($tab.siblings(".is-active").index())//获取前一个激活状态的tab的index
+    //alert($tab.index())
+    //alert($tab.siblings(".is-active").index())//获取前一个激活状态的tab的index
     //alert($tab.hasClass('is-active').index())
-    if (!$tab.hasClass('is-active')&&$tab.siblings(".is-active").index()>$tab.index()) {
+    //if (!$tab.hasClass('is-active')&&$tab.siblings(".is-active").index()>$tab.index()) {
       $tab.siblings().removeClass('is-active');
       $tab.addClass('is-active');
    
       TabBlock.showPane($tab.index(), $context);
+    if($tab.index()!==4){
+      var myDiv=document.getElementById('submit-button-div');
+      myDiv.innerHTML='<button id="next" class="btn btn-block btn-large btn-success" type="button" onclick="submit($(\'.tabBlock-tabs\'))">>></button>';
     }
+    else {
+      document.getElementById('next').innerText='保存此条数据';
+      document.getElementById('next').onclick=function ( ) {
+        submit($tab);
+        sendStatus();
+      }
+      var myDiv=document.getElementById('submit-button-div');
+      var button1 = '<button id="nextData" class="btn btn-block btn-large btn-success" type="button" onclick=getNextData()>下一项</button>'
+      myDiv.innerHTML+=button1;
+    }
+    //}
    },
   
   showPane: function(i, $context) {

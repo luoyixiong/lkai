@@ -26,12 +26,13 @@ urlpatterns = [
     path('search/', views.index),
     # path('index/bussiness/', views.bussiness),
     # path('insert_quota/', views.insert_quota),
-    path('index/insert/',views.insert),
+    path('index/insert/', views.insert),
     path('login/', views.login),
     path("index/bussiness_search/", views.bussiness_search),
-    path('index/bussiness2/',views.bussiness2),
-    path('test2/', views.test),
+    path('test2/', views.test2),
     path('index/getEdit', views.getEdit),
     path('index/getProp', views.getProp),
     path('index/getUserInfo', views.getUserInfo),
+    path('index/bussiness2/', views.bussiness2),
+
 ]
