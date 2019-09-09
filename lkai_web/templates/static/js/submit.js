@@ -93,7 +93,7 @@ function submit($tab) {
                     //console.log(forms[i].getAttribute("eid"))
                     result[j].propid = forms[i].getAttribute("prop_id");
                     result[j].value = forms[i].value;
-                    console.log(result)
+                    // console.log(result)
                 }
             }}
         if(forms[i].type==="checkbox"){
@@ -122,10 +122,7 @@ function submit($tab) {
         success: function (result) {
             //console.log(result);//打印服务端返回的数据(调试用)
             if (result.resultCode == 200) {
-
                 alert("SUCCESS");
-
-
             };
 
         },
@@ -133,8 +130,8 @@ function submit($tab) {
             //alert("hhh");
         }
     });
-
 }
+
 function change($tab) {
     $atab=$tab.find('.tabBlock-tab.is-active');
     //alert('content'+$atab.next().index()+0)
@@ -196,6 +193,7 @@ function sendStatus() {
     xmlhttp.open("GET",'new.json',true);//发送一个url来改变数据状态
     xmlhttp.send();
 }
+
 function getNextData() {
-    window.location.reload();
+    window.location.href = '/index';
 }

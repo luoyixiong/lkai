@@ -65,15 +65,42 @@ def getProp(request):
                     result = result[subpropid]
                 else:
                     result = ''
+        elif propid.split('.')[-1] in listType:
+            result = [['', '', '']]
+
     elif datatype == 'old':
         if propid in prop_list:
             result = prop_list[propid]
+
     if isinstance(result, str):
         return HttpResponse(result)
     elif isinstance(result, list):
-        return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),content_type='application/json')
+        return HttpResponse(json.dumps(result, default={}, ensure_ascii=False), content_type='application/json')
     else:
         return HttpResponse(status=404)
+
+
+def search(request):
+    if request.is_ajax():
+        data = json.loads(request.body)
+        result = {}
+        userName = request.session.get("username_check")
+        EID = 'lkai.ent.'+data['str']
+        category = data['category']
+        if category == 'finished':
+           queryRes =  Entity.objects.filter(EID=EID, check_name=userName,check=1)
+        elif category == 'unfinish':
+            queryRes = Entity.objects.filter(EID=EID, check_name=userName, check=0)
+        elif category == 'unsure':
+            queryRes = EntityNew.objects.filter(EID=EID, check_name=userName, doubt=1)
+        else:
+            return HttpResponse(status=404)
+        if len(queryRes) > 0:
+            result['resultCode'] = 200
+        else:
+            result['resultCode'] = 400
+
+        return HttpResponse(json.dumps(result, default={}, ensure_ascii=False), content_type='application/json')
 
 
 # 处理客户端提交的数据
@@ -220,7 +247,7 @@ def getPropList(EID):
     result = {}
 
     oldProps = PropertyData.objects.filter(EID=EID, objid=None)
-
+    print(oldProps, len(oldProps))
     for prop in oldProps:
 
         if prop.PROPID in result:
@@ -288,14 +315,17 @@ def getSinglePropNew(EID, objid):
 
 
 def bussiness2(request):
-    global prop_list, prop_list_new
 
     userName = request.session.get('username_check')
+    global formCheckList
+    formCheckList = [False] * 5
 
     EID = request.session.get('eid')
     if EID is None:
         EID = Entity.objects.filter(check_name=userName, check=0)[0].EID
         request.session['eid'] = EID
+
+    global prop_list, prop_list_new
     prop_list = getPropList(EID)
     prop_list_new = getPropListNew(EID)
 
@@ -308,18 +338,11 @@ def bussiness2(request):
 def test2(request):
     # result = getAllPropDataDic('lkai.ent.低密度脂蛋白胆固醇', 'lkai.prop.结果解读')
     #result = genDefJson('lkai.ent.低密度脂蛋白胆固醇')
-    result = getPropListNew('lkai.ent.骨髓各系细胞形态学检查')
+    result = getPropList('lkai.ent.红细胞表面电荷')
     # result = PropertyData.objects.filter(EID='lkai.ent.可的松水试验',PROPID='lkai.prop.结果解读')
 
     return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),
                         content_type='application/json')
-
-
-# def test(request):
-#     template_data = {'tabNames': ["名称", "指标信息", "指标意义", "检查须知", "实验室相关"]}
-#     result = genDefJson('lkai.ent.低密度脂蛋白胆固醇')
-#     template_data['defs'] = [result['DEF_1'],result['DEF_2'],result['DEF_3'],result['DEF_4'],result['DEF_5']]
-#     return render(request, 'index_templates.html', template_data)
 
 
 def genDefJson(EID):
@@ -430,7 +453,9 @@ def check_login(f):
 
 @check_login
 def index(request):
-    return render( request,"index.html")
+
+    request.session['eid'] = request.GET.get('eid')
+    return render(request, "index.html")
 
 
 def insert_quota(request):
@@ -449,9 +474,17 @@ def insert_quota(request):
 
 def f_search(request):
     q = request.GET['text']
-    print(q)
-    #
-    re_contents = Entity.objects.filter(EID__contains=q, check_name=request.session.get("username_check"))
+    category = request.GET['sel']
+    userName = request.session.get("username_check")
+    if category == 'finished':
+        re_contents = Entity.objects.filter(EID__contains=q, check_name=userName, check=1)
+    elif category == 'unfinish':
+        re_contents = Entity.objects.filter(EID__contains=q, check_name=userName, check=0)
+    elif category == 'unsure':
+        re_contents = EntityNew.objects.filter(EID__contains=q, check_name=userName, doubt=1)
+    else:
+        re_contents = []
+
     re_json = []
     for re_content in re_contents:
         quota_name = re_content.EID.split(".")[-1]
@@ -1381,6 +1414,9 @@ def bussiness(request):
     # print(json.dumps(bussiness, default=quota_to_json, ensure_ascii=False, indent=2))
     return HttpResponse(json.dumps(bussiness, default=quota_to_json, ensure_ascii=False),
                         content_type='application/json')
+
+
+
 
 
 def insert(request):

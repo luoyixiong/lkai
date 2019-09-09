@@ -481,3 +481,37 @@ function delItem(item) {
     //item.closest('.itemC:first').remove();
     item.parents('.itemC')[0].remove();
 }
+
+
+function searchItem() {
+    var str=document.getElementById('searchBox').value;
+    var category=document.getElementById('sel').value;
+
+    if (str === "" ){
+
+        alert("请输入要搜索的指标名称！")
+
+    }else {
+        var result = new Object();
+        result['str'] = str;
+        result['category'] = category;
+        $.ajax({
+            //几个参数需要注意一下
+            type: "POST",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "./search",//url 大佬需要修改的路径
+            data: JSON.stringify(result),
+            success: function (result) {
+                console.log(result);//打印服务端返回的数据(调试用)
+                if (result.resultCode == 200) {
+                    window.location.href = '/index?eid=lkai.ent.'+str
+                }else {
+                    alert("搜索的指标不存在");
+                };
+            },
+            error: function () {
+                alert("hhh");
+            }
+        });
+    }
+}

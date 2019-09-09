@@ -34,5 +34,5 @@ urlpatterns = [
     path('index/getProp', views.getProp),
     path('index/getUserInfo', views.getUserInfo),
     path('index/bussiness2/', views.bussiness2),
-
+    path('index/search', views.search),
 ]

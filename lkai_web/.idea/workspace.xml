@@ -2,17 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bb0fd2ec-5210-41a7-b6e2-0df023640eec" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/complete.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/static/js/loadStructure.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/static/js/submit.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lkai_web/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/lkai_web/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/static/css3-simple-tab/js/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/templates/static/css3-simple-tab/js/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/static/js/load.js" beforeDir="false" afterPath="$PROJECT_DIR$/templates/static/js/load.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/static/js/load1.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/static/js/loadStructure.js" beforeDir="false" afterPath="$PROJECT_DIR$/templates/static/js/loadStructure.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/static/js/submit.js" beforeDir="false" afterPath="$PROJECT_DIR$/templates/static/js/submit.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/static/js/tools.js" beforeDir="false" afterPath="$PROJECT_DIR$/templates/static/js/tools.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -54,14 +49,6 @@
         <item name="211.82.97.42" type="feb32156:DbDataSourceImpl" />
         <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
         <item name="lkai_kbgraph_django: schema" type="76f4a085:MysqlImplModel$Schema" />
-      </path>
-      <path>
-        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
-        <item name="mysql:" type="cc8827a6:DatabaseStructure$DbGroup" />
-        <item name="211.82.97.42" type="feb32156:DbDataSourceImpl" />
-        <item name="schemas" type="d4e8921:DatabaseStructure$FamilyGroup" />
-        <item name="lkai_kbgraph_django: schema" type="76f4a085:MysqlImplModel$Schema" />
-        <item name="t_dat_instance_property_info_new: table" type="285a2a93:MysqlImplModel$Table" />
       </path>
     </expand>
     <select />
@@ -322,8 +309,17 @@
       <workItem from="1567665922098" duration="1697000" />
       <workItem from="1567669257355" duration="20583000" />
       <workItem from="1567749375978" duration="13295000" />
-      <workItem from="1567907116632" duration="1268000" />
+      <workItem from="1567907116632" duration="7126000" />
+      <workItem from="1567996657235" duration="7743000" />
     </task>
+    <task id="LOCAL-00001" summary="basic features： display update">
+      <created>1567911216421</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1567911216421</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -341,6 +337,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="basic features： display update" />
+    <option name="LAST_COMMIT_MESSAGE" value="basic features： display update" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/lkai_web$views.coverage" NAME="views Coverage Results" MODIFIED="1566524488590" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />

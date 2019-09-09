@@ -84,10 +84,10 @@ function itemData(item) {
         // console.log(i);
         html+='<div  style=\'display:block; padding:5px; cursor:pointer\'  onclick=\'clickFn(this)\'  onmouseover=\'overFn(this)\'  onmouseout=\'outFn(this)\'>'
         if(item[i]["isFinished"]===0){
-            html += '<a style="color:#419641" href="../s?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
+            html += '<a style="color:#419641" href="../index?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
         }
         else if(item[i]["isFinished"]===1) {
-            html += '<a style="color: #faa732" href="../s?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
+            html += '<a style="color: #faa732" href="../index?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
         }
         html+='</div>'
     }
