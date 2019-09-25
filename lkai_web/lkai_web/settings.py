@@ -24,7 +24,7 @@ SECRET_KEY = '#%0_9%0$!%y&^j0mt2a12y84wmba$3s!$81kr5+op49zn4b)*q'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', ]
 
 # Application definition
 
@@ -63,6 +63,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'builtins':[
+                'django.templatetags.static'
+            ],
         },
     },
 ]
@@ -75,10 +78,10 @@ WSGI_APPLICATION = 'lkai_web.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '211.82.97.42',
+        'HOST': '211.82.97.13',
         'PORT': '3306',
         'USER': 'root',
-        'PASSWORD': '123456',
+        'PASSWORD': 'mutianyang1996',
         'NAME': 'lkai_kbgraph_django',
         # 'OPTIONS': {
         #             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",

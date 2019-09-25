@@ -17,9 +17,10 @@ function loadTab() {
     document.getElementById('tabs').innerHTML=html;
 }
 
+
 //获取用户基本信息
 function getUserInfo() {
-    var xmlhttp;
+    let xmlhttp;
     if (window.XMLHttpRequest)
     {
         xmlhttp=new XMLHttpRequest();
@@ -30,38 +31,12 @@ function getUserInfo() {
     }
     xmlhttp.onreadystatechange=function()
     {
-        if (xmlhttp.readyState===4 && xmlhttp.status===200)
-        {
-            var jsonObj = JSON.parse(xmlhttp.responseText);
-            var j=0;
-            var userInfo=new Array();
-            for (var i in jsonObj["userInfo"][0]){
-                //console.log(jsonObj["userInfo"][0][i]);
-                userInfo[j]=jsonObj["userInfo"][0][i];
-                j+=1;
+        if (xmlhttp.readyState===4 && xmlhttp.status===200){
+            const jsonObj = JSON.parse(xmlhttp.responseText);
+            const info = jsonObj["userInfo"][0];
+            for(let key in info){
+                document.getElementById(key).innerText=info[key];
             }
-            //
-            // console.log(userInfo[2])
-            for (var n=0;n<userInfo.length;n++){
-                switch (n) {
-                    case 0:document.getElementById('userName').innerText=userInfo[0];
-                        break;
-                    case 1:document.getElementById('itemName').innerText=userInfo[1];
-                        break;
-                    case 2:document.getElementById('finishedNumber').innerText=userInfo[2];
-                        break;
-                    case 3:document.getElementById('unfinishNumber').innerText=userInfo[3];
-                        break;
-                    case 4:document.getElementById('all').innerText=userInfo[4];
-                        break;
-                    case 5:document.getElementById('doubt').innerText=userInfo[5];
-                        break;
-                    case 6:itemData(userInfo[6]);
-                    default:break;
-
-                }
-            }
-
         }
         else {
         }
@@ -69,6 +44,7 @@ function getUserInfo() {
     xmlhttp.open("GET",'./getUserInfo',true);//获取用户信息 大佬改url
     xmlhttp.send();
 }
+
 
 //加载结构
 function loadStru() {
@@ -88,15 +64,15 @@ function loadStru() {
             var jsonObj = JSON.parse(xmlhttp.responseText);
             var html=analyzingStrus(jsonObj);
             document.getElementById("contents").innerHTML=html;
-
+            checkboxs(jsonObj['doubt'])
         }
         else {
         }
     }
     xmlhttp.open("GET",'./bussiness2',true);//获取结构数据 大佬改url
     xmlhttp.send();
-
 }
+
 
 //分析结构数据 设计新旧数据的布局
 function analyzingStrus(json) {
@@ -107,20 +83,22 @@ function analyzingStrus(json) {
         if(ele==='EID'){
             eid_value=json[ele];
             //console.log(eid_value);
-        }
-        else if(ele=='name'){
+        }else if(ele==='doubt'){
+
+        }else if(ele=='name'){
             name_value=json[ele];
         }
         else{
             if(ele==='DEF_1'){
                 html+='<div class="tabBlock-pane" style="display: block">';
-            }
-            else{
+            }else{
                 html+='<div class="tabBlock-pane" style="display: none">';
             }
             html+='<form action="##" id=form'+ele.charAt(ele.length-1)+'  class="form-horizontal" onsubmit="return false">';
             html+='<div class="container-fluid">'
+            var i = 0;
             for(var prop in json[ele]){
+                i+=1;
                 //console.log(json[ele][prop]);//DEF_n
                 //console.log(json[ele][prop]["type"]);//type
                 html+='<div class="row-fluid" style="display: table;padding:5px">';
@@ -132,7 +110,7 @@ function analyzingStrus(json) {
                 html+=getObjectData(json[ele][prop],eid_value,"new");
                 html+='</div>';
                 html+='&ensp;<div class="box2" style="display: inline-block;">' +
-                    '<label class="checkbox"><input type="checkbox" value="" name="checkbox'+ele.charAt(ele.length-1)+'"/>存疑</label>' +
+                    '<label class="checkbox"><input type="checkbox" value="" id="checkbox'+ele.charAt(ele.length-1)+i+'"/>存疑</label>' +
                     '</div></div>';//span6
                 html+='</div>';
             }
@@ -149,6 +127,47 @@ function analyzingStrus(json) {
     return html;
 }
 
+
+function getPropDataSelect(eid,propid) {
+    var xmlhttp;
+    var a=1;
+    if (window.XMLHttpRequest)
+    {
+        xmlhttp=new XMLHttpRequest();
+    }
+    else
+    {
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xmlhttp.onreadystatechange=function()
+    {
+        if (xmlhttp.readyState===4 && xmlhttp.status===200)
+        {
+            var jsonObj =xmlhttp.responseText;
+            console.log('getPropDataSelect',jsonObj)
+            var sel=document.getElementById(eid+'-'+propid+'-'+"new")
+            for (var s=0;s<sel.options.length;s++){
+                //console.log(escape(sel.options[s].text))
+                //console.log(escape(jsonObj));
+                if(jsonObj===""){sel.options[1].selected=true;}
+                else if (escape(sel.options[s].text)===escape(jsonObj)){//进行编码 否则无法判断相等
+                    console.log("相等")
+                    sel.options[s].selected=true;//无法判断相等
+                    console.log("判断相等完成")
+                }
+                // else {
+                //     sel.options[1].selected=true;
+                // }
+            }
+        }
+        else {
+        }
+    }
+    xmlhttp.open("GET",'./getProp?propid='+propid+'&datatype=new',true); //请求旧表数据 大佬需要修改url 发送 eid、propid 数据类型 new 返回字符串 对于select的处理
+    xmlhttp.send();
+}
+
+
 //生成每项数据的结构
 function getObjectData(json,eid,datatype) {
     var html="";
@@ -159,6 +178,7 @@ function getObjectData(json,eid,datatype) {
     }
     else if(datatype==="new")
     {
+        html+='<label  class="form-inline" style="color: #e9322d" >'+json["tip"]+'</label>';
         if(json["type"]==="string"){
 
             html += '<textarea fid="'+json["propid"]+'" id="'+eid+'-'+json["propid"]+'-'+"new"+'" dtype="'+json["type"]+'" eid=' + eid + ' prop_id=' + json["propid"] + ' name="propname">' + getPropDataString(eid, json["propid"]) + '</textarea>'
@@ -166,8 +186,9 @@ function getObjectData(json,eid,datatype) {
         else if(json["type"]==="select"){
             if (json["enum_list"] instanceof Array) {
                 html += '<div class="side-by-side clearfix"><div class="side-by-side clearfix"><div>';
-                html +='<select fid="'+json["propid"]+'" data-placeholder="" class="chosen-select" tabindex="5" eid=' + eid + ' prop_id= ' + json["propid"] +'>';
-                html += '<option fid="'+json["propid"]+'" id="'+eid+'-'+json["propid"]+'-'+"new"+'" dtype="'+json["type"]+'" eid=' + eid + ' prop_id=' + json["propid"] + ' value="">' + getPropDataString(eid, json["propid"]) + '</option>';
+                html +='<select id="'+eid+'-'+json["propid"]+'-'+"new"+'" fid="'+json["propid"]+'" data-placeholder="" class="chosen-select" tabindex="5" eid=' + eid + ' prop_id= ' + json["propid"] +'>';
+                html += '<option fid="'+json["propid"]+'" id1="'+eid+'-'+json["propid"]+'-'+"new"+'" dtype="'+json["type"]+'" eid=' + eid + ' prop_id=' + json["propid"] + ' value=""></option>';
+                getPropDataSelect(eid, json["propid"])
                 for (var subProp in json["enum_list"]) {
                     //console.log(); //单层下拉列表值
                     html += '<option>' + json["enum_list"][subProp] + '</option>';
@@ -175,8 +196,9 @@ function getObjectData(json,eid,datatype) {
                 html += '</select></div></div></div>';
             } else if (json["enum_list"] instanceof Object) {
                 html += '<div class="side-by-side clearfix"><div class="side-by-side clearfix"><div>';
-                html +='<select fid="'+json["propid"]+'"  data-placeholder="qing" class="chosen-select" tabindex="5" eid=' + eid + ' prop_id= ' + json["propid"] +'>';
-                html += '<option fid="'+json["propid"]+'" id="'+eid+'-'+json["propid"]+'-'+"new"+'" dtype="'+json["type"]+'" eid=' + eid + ' prop_id=' + json["propid"] + ' value="">' + getPropDataString(eid, json["propid"]) + '</option>';
+                html +='<select id="'+eid+'-'+json["propid"]+'-'+"new"+'" fid="'+json["propid"]+'"  data-placeholder="qing" class="chosen-select" tabindex="5" eid=' + eid + ' prop_id= ' + json["propid"] +'>';
+                html += '<option fid="'+json["propid"]+'" id1="'+eid+'-'+json["propid"]+'-'+"new"+'" dtype="'+json["type"]+'" eid=' + eid + ' prop_id=' + json["propid"] + ' value=""></option>';
+                getPropDataSelect(eid, json["propid"])
                 for (var subTitle in json["enum_list"]) {
                     //console.log(subTitle);//list第一层名称
                     html += '<optgroup label=' + subTitle + '>'
@@ -206,7 +228,7 @@ function getObjectData(json,eid,datatype) {
             else {
                 for(var i in json["fields"]){
                     html+='<label class="form-inline" style="font-weight: bold" >'+json["fields"][i]+'</label>';
-                    html+='<input prop_id="'+json["fields"][i]+'" fid="'+json["propid"]+'" type="text" id="'+eid+'-'+json["propid"]+'-'+json["fields"][i] +'"  eid=' + eid + ' data-role="tagsinput" value="'+getPropDataOt(eid, json["propid"],json["fields"][i])+'">';
+                    html+='<input prop_id="'+json["fields"][i]+'" fid="'+json["propid"]+'" type="text" id="'+eid+'-'+json["propid"]+'-'+json["fields"][i] +'"  eid=' + eid + '  value="'+getPropDataOt(eid, json["propid"],json["fields"][i])+'">';
                 }
                 //相关疾病、相关症状
             }
@@ -216,9 +238,9 @@ function getObjectData(json,eid,datatype) {
                 var propid=json["propid"]
                 var gender=new Array("男","女","无");
                 var age=new Array("老人","成人","儿童","婴儿","无");
-                html+='<div id="addItemPosition">'
+                html+='<div id="addItemPosition">';
                 html+='<div class="itemC">';
-                html+='<div style="float:left;width: 30%">'
+                html+='<div style="float:left;width: 30%">';
                 html += '<div class="side-by-side clearfix" ><div class="side-by-side clearfix"><div>';
                 html +='<select name="lists" fid="'+json["propid"]+'" data-placeholder=""  class="chosen-select" tabindex="5" style="width: 100%"  sid="gender" eid=' + eid + ' prop_id= ' + json["propid"] +'>';
                 html += '<option value="" sid="gender" fid="'+json["propid"]+'" class="mylist" eid=' + eid + ' prop_id=' + json["propid"] + ' value="">' + getPropDataList(eid, json["propid"]) + '</option>';
@@ -228,7 +250,7 @@ function getObjectData(json,eid,datatype) {
                 }
                 html += '</select></div></div></div>';
                 html+='</div>';//选择性别
-                html+='<div style="float:left;width: 30%">'
+                html+='<div style="float:left;width: 30%">';
                 html += '<div class="side-by-side clearfix" ><div class="side-by-side clearfix"><div>';
                 html +='<select name="lists" fid="'+json["propid"]+'" data-placeholder="" class="chosen-select" tabindex="5" style="width: 100%"  sid="age" eid=' + eid + ' prop_id= ' + json["propid"] +'>';
                 html += '<option value="" sid="age" fid="'+json["propid"]+'" class="mylist"  eid=' + eid + ' prop_id= ' + json["propid"] + '  value=""></option>';
@@ -238,8 +260,8 @@ function getObjectData(json,eid,datatype) {
                 }
                 html += '</select></div></div></div>';
                 html+='</div>';//年龄选择
-                html+='<div style="float: left; width: 25%"><input fid="'+json["propid"]+'" class="mylist" eid=' + eid + ' prop_id=' + json["propid"] + ' sid="fw" style="width: 100%" /></div>';
-                html+='<div style="float: left;width: 15%"><button onclick=addItem("'+eid+'","'+propid+'","'+propid+'")>+</button></div>'
+                html+='<div style="float: left; width: 60%"><textarea  fid="'+json["propid"]+'" class="mylist" eid=' + eid + ' prop_id=' + json["propid"] + ' sid="fw" style="width: 100%;height: 60px" ></textarea></div>';
+                html+='<div style="float: left;width: 15%"><span class="btn" onclick=addItem("'+eid+'","'+propid+'","'+propid+'")>添加</span></div>'
                 html+='</div>';
             if(num>1) {
                 for (var i=0;i<num-1;i++){
@@ -264,8 +286,8 @@ function getObjectData(json,eid,datatype) {
                     }
                     html += '</select></div></div></div>';
                     html+='</div>';//年龄选择
-                    html+='<div  style="float: left; width: 25%"><input fid="'+json["propid"]+'" class="mylist" eid=' + eid + ' prop_id=' +propid + ' sid="fw" style="width: 100%"/></div>'//参考范围
-                    html+='<div style="float: left;width: 15%"><button onclick="delItem($(\'button\'))">-</button></div>';
+                    html+='<div  style="float: left; width: 60%"><textarea  fid="'+json["propid"]+'" class="mylist" eid=' + eid + ' prop_id=' +propid + ' sid="fw" style="width: 100%;height: 60px"></textarea></div>'//参考范围
+                    html+='<div style="float: left;width: 15%"><span class="btn" onclick="delItem($(\'span\'))">删除</span></div>';
                    html+='</div>';
                 }
 
@@ -277,6 +299,17 @@ function getObjectData(json,eid,datatype) {
     }
     return html;
 }
+
+function checkboxs(che) {
+    if (che !== '') {
+        var val = che.split(",");
+        for (var i in val) {
+            console.log("查看id" + "checkbox" + val[i])
+            document.getElementById("checkbox" + val[i]).checked = true;
+        }
+    }
+}
+
 //获取旧数据
 function getOlddata(eid,propid) {
     var xmlhttp;
@@ -320,7 +353,8 @@ function getPropDataString(eid,propid) {
         if (xmlhttp.readyState===4 && xmlhttp.status===200)
         {
             var jsonObj = xmlhttp.responseText;
-            document.getElementById(eid+'-'+propid+'-'+"new").innerText=jsonObj;
+            console.log('显示换行',jsonObj)
+            document.getElementById(eid+'-'+propid+'-'+"new").value=jsonObj;
 
         }
         else {
@@ -329,9 +363,11 @@ function getPropDataString(eid,propid) {
     xmlhttp.open("GET",'./getProp?propid='+propid+'&datatype=new',true); //请求旧表数据 大佬需要修改url 发送 eid、propid 数据类型 new 返回字符串
     xmlhttp.send();
 }
+
 function getPropData() {
     
 }
+
 function getPropDataO(eid,propid,name) {
     var xmlhttp;
     //console.log(eid+'-'+propid+'-'+name)
@@ -348,7 +384,7 @@ function getPropDataO(eid,propid,name) {
         if (xmlhttp.readyState===4 && xmlhttp.status===200)
         {
             var jsonObj = xmlhttp.responseText;
-            document.getElementById(eid+'-'+propid+'-'+name).innerText=jsonObj;
+            document.getElementById(eid+'-'+propid+'-'+name).value=jsonObj;
 
         }
         else {
@@ -461,8 +497,8 @@ function addItem(eid,propid,fpropid) {
     }
     html += '</select></div></div></div>';
     html+='</div>';//年龄选择
-    html+='<div   style="float: left; width: 25%"><input fid='+fpropid+' eid=' + eid + ' prop_id=' +propid + ' sid="fw" style="width: 100%" value=""/></div>'//参考范围
-    html+='<div style="float: left;width: 15%"><button onclick="delItem($(\'button\'))">-</button></div>';
+    html+='<div   style="float: left; width: 60%"><textarea  fid='+fpropid+' eid=' + eid + ' prop_id=' +propid + ' sid="fw" style="width: 100%;height: 60px" value=""></textarea></div>'//参考范围
+    html+='<div style="float: left;width: 15%"><span class="btn" onclick="delItem($(\'span\'))">删除</span></div>';
     //html+='</div>';
     //console.log("hhhhhhh")
     // $("#addItemPosition").append(html);
@@ -494,7 +530,7 @@ function searchItem() {
     }else {
         var result = new Object();
         result['str'] = str;
-        result['category'] = category;
+
         $.ajax({
             //几个参数需要注意一下
             type: "POST",//方法类型
@@ -504,7 +540,8 @@ function searchItem() {
             success: function (result) {
                 console.log(result);//打印服务端返回的数据(调试用)
                 if (result.resultCode == 200) {
-                    window.location.href = '/index?eid=lkai.ent.'+str
+                    window.location.href = '/index?eid=lkai.ent.'+str;
+                    // window.location.reload();
                 }else {
                     alert("搜索的指标不存在");
                 };

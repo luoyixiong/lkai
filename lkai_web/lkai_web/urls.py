@@ -16,23 +16,30 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from app import views
+from app.views import views_admin, views_user
+
 
 urlpatterns = [
-    path('admin/theme/data', views.data),
-    path('admin/', admin.site.urls),
-    path('index/', views.index),
-    path('f_search/', views.f_search),
-    path('search/', views.index),
+    path('assign/', views_admin.index),
+    path('assign/task', views_admin.excuteTask),
+    # path('admin/', admin.site.urls),
+
+    path('index/', views_user.index),
+    path('f_search/', views_user.f_search),
+    # path('search/', views.index),
     # path('index/bussiness/', views.bussiness),
     # path('insert_quota/', views.insert_quota),
-    path('index/insert/', views.insert),
-    path('login/', views.login),
-    path("index/bussiness_search/", views.bussiness_search),
-    path('test2/', views.test2),
-    path('index/getEdit', views.getEdit),
-    path('index/getProp', views.getProp),
-    path('index/getUserInfo', views.getUserInfo),
-    path('index/bussiness2/', views.bussiness2),
-    path('index/search', views.search),
+    path('index/insert/', views_user.insert),
+    path('login/', views_user.login),
+    path("index/bussiness_search/", views_user.bussiness_search),
+
+    path('index/getEdit', views_user.getEdit),
+    path('index/getProp', views_user.getProp),
+    path('index/getUserInfo', views_user.getUserInfo),
+    path('index/bussiness2/', views_user.bussiness2),
+    path('index/search', views_user.search),
+    path('index/getAllZB', views_user.getAllZB),
+    path('index/jumpZB', views_user.jumpZB),
+
+    path('test2/', views_user.test2),
 ]

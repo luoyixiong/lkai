@@ -63,7 +63,7 @@ function submit($tab) {
                     }
                     console.log(result)
                 }
-                else if(forms[i].getAttribute("fid")==="lkai.prop.相关疾病"||forms[i].getAttribute("fid")==="lkai.prop.相关症状"||forms[i].getAttribute("fid")==="lkai.prop.建议与指导") {
+                else if(forms[i].getAttribute("fid")==="lkai.prop.建议与指导") {
                     //  console.log("没错没错没错"+forms[i].getAttribute('prop_id') )
                     if(forms[i].getAttribute("prop_id")==="高于正常值") {
                         result[j].eid = forms[i].getAttribute("eid");
@@ -122,7 +122,9 @@ function submit($tab) {
         success: function (result) {
             //console.log(result);//打印服务端返回的数据(调试用)
             if (result.resultCode == 200) {
-                alert("SUCCESS");
+                if(formIndex == 5) {
+                    alert("此条数据保存成功，请点击 下一项 按钮");
+                }
             };
 
         },

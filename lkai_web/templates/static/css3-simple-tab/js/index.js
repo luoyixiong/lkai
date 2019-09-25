@@ -33,7 +33,7 @@ var TabBlock = {
     //alert($tab.index())
     //alert($tab.siblings(".is-active").index())//获取前一个激活状态的tab的index
     //alert($tab.hasClass('is-active').index())
-    //if (!$tab.hasClass('is-active')&&$tab.siblings(".is-active").index()>$tab.index()) {
+    if (!$tab.hasClass('is-active')&&$tab.siblings(".is-active").index()>$tab.index()) {
       $tab.siblings().removeClass('is-active');
       $tab.addClass('is-active');
    
@@ -52,7 +52,7 @@ var TabBlock = {
       var button1 = '<button id="nextData" class="btn btn-block btn-large btn-success" type="button" onclick=getNextData()>下一项</button>'
       myDiv.innerHTML+=button1;
     }
-    //}
+    }
    },
   
   showPane: function(i, $context) {

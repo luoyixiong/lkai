@@ -52,7 +52,7 @@ class Entity(models.Model):
     insert_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now=True)
     check_name = models.CharField(max_length=255, null=True)
-    check = models.BooleanField(default=False)
+    check = models.IntegerField(default=0)
 
     class Meta:
         db_table = "t_dat_instance_info"
@@ -154,6 +154,86 @@ class Concept(models.Model):
 
     class Meta:
         db_table = "t_def_concept_info"
+
+
+# 疾病的实体属性表的模型类
+class PropertyDataDisease(models.Model):
+    EPID = models.BigAutoField(primary_key=True)
+    EID = models.CharField(max_length=255)
+    PROPID = models.CharField(max_length=255)
+    objid = models.CharField(max_length=255, null=True)
+    prop_value = models.TextField()
+    origin = models.CharField(max_length=50, null=True)
+    ownuser = models.CharField(max_length=50, null=True)
+    insert_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+
+    # doubt = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "t_dat_instance_property_info_disease"
+
+    def __str__(self):
+        return self.prop_value
+
+
+# 症状的实体属性表的模型类
+class PropertyDataSymptom(models.Model):
+    EPID = models.BigAutoField(primary_key=True)
+    EID = models.CharField(max_length=255)
+    PROPID = models.CharField(max_length=255)
+    objid = models.CharField(max_length=255, null=True)
+    prop_value = models.TextField()
+    origin = models.CharField(max_length=50, null=True)
+    ownuser = models.CharField(max_length=50, null=True)
+    insert_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+
+    # doubt = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "t_dat_instance_property_info_symptom"
+
+    def __str__(self):
+        return self.prop_value
+
+
+# 症状实体类
+class EntitySymptom(models.Model):
+    EID = models.CharField(max_length=100)
+    CPTID = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    icon = models.ImageField()
+    ownuser = models.CharField(max_length=50, null=True)
+    insert_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+    check_name = models.CharField(max_length=255, null=True)
+    check = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = "t_dat_instance_info_symptom"
+
+    def __str__(self):
+        return self.EID  # 实体类
+
+
+# 疾病实体表
+class EntityDisease(models.Model):
+    EID = models.CharField(max_length=100)
+    CPTID = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    icon = models.ImageField()
+    ownuser = models.CharField(max_length=50, null=True)
+    insert_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
+    check_name = models.CharField(max_length=255, null=True)
+    check = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = "t_dat_instance_info_disease"
+
+    def __str__(self):
+        return self.EID
 
 
 class User(models.Model):

@@ -58,10 +58,34 @@ function myFunction(xml) {
     }
     mydiv.innerHTML =div;
 }
+
+
 function showAll(obj) {
-   //itemData(arr);
-    var mydiv=document.getElementById("allItem");
-    mydiv.style.display="block"
+    var sel=document.getElementById("sel").value;
+    var xmlhttp;
+    console.log("hahahahah")
+    if (window.XMLHttpRequest)
+    {
+        // IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+        xmlhttp=new XMLHttpRequest();
+    }
+    else
+    {
+        // IE6, IE5 浏览器执行代码
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xmlhttp.onreadystatechange=function()
+    {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            var jsonObj = JSON.parse(xmlhttp.responseText);
+            itemData(jsonObj);
+            var mydiv=document.getElementById("allItem");
+            mydiv.style.display="block";
+        }
+    }
+    xmlhttp.open("GET","./getAllZB",true);//大佬改 //sel传送类别
+    xmlhttp.send();
 }
 function itemData(item) {
 //     var i;
@@ -76,22 +100,43 @@ function itemData(item) {
 //     }
 //     mydiv.innerHTML =div;
     var html="";
+    var html1="";
+    var html2="";
+    var html3="";
+    var sel=document.getElementById("sel").value;
+    console.log(sel);
     for(var i in item){
             // console.log(item[i]["eid"]);
             // console.log(item[i]["name"]);
             // console.log(item[i]["isFinished"]);
 
         // console.log(i);
-        html+='<div  style=\'display:block; padding:5px; cursor:pointer\'  onclick=\'clickFn(this)\'  onmouseover=\'overFn(this)\'  onmouseout=\'outFn(this)\'>'
+
         if(item[i]["isFinished"]===0){
-            html += '<a style="color:#419641" href="../index?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
+            html1+='<div  style=\'display:block; padding:5px; cursor:pointer\'  onclick=\'clickFn(this)\'  onmouseover=\'overFn(this)\'  onmouseout=\'outFn(this)\'>'
+            html1 += '<a style="color:#419641" href="../index?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
+            html1+='</div>'
         }
         else if(item[i]["isFinished"]===1) {
-            html += '<a style="color: #faa732" href="../index?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
+            html2+='<div  style=\'display:block; padding:5px; cursor:pointer\'  onclick=\'clickFn(this)\'  onmouseover=\'overFn(this)\'  onmouseout=\'outFn(this)\'>'
+            html2 += '<a style="color: #faa732" href="../index?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
+            html2+='</div>'
         }
-        html+='</div>'
+        else if (item[i]["isFinished"]===2){
+            html3+='<div  style=\'display:block; padding:5px; cursor:pointer\'  onclick=\'clickFn(this)\'  onmouseover=\'overFn(this)\'  onmouseout=\'outFn(this)\'>'
+            html3 += '<a style="color:#975997" href="../index?eid=' + item[i]["eid"] + '">' + item[i]["name"] + '</a>'//大佬改href
+            html3+='</div>'
+        }
     }
-    document.getElementById("allItem").innerHTML=html;
+    switch (sel) {
+        case "finished":document.getElementById("allItem").innerHTML=html1;
+        break;
+        case "unfinish":document.getElementById("allItem").innerHTML=html2; console.log("这是未完成")
+        break;
+        case "unsure":document.getElementById("allItem").innerHTML=html3;
+        break;
+        default:break;
+    }
 
 }
 function hideAll() {
@@ -102,6 +147,26 @@ function hideAll() {
 
     var s=document.getElementById('allItem');
     s.style.display="none";
+}
 
-
+function jump() {
+    // var id='lkai.ent.'+document.getElementById('itemName').value;
+    // var result = new Object();
+    // result.eid = id;
+    $.ajax({
+        //几个参数需要注意一下
+        type: "POST",//方法类型
+        dataType: "json",//预期服务器返回的数据类型
+        url: "./jumpZB" ,//url 大佬需要修改的路径
+        //data: JSON.stringify(""),
+        success: function (result) {
+            //console.log(result);//打印服务端返回的数据(调试用)
+            if (result.resultCode == 200) {
+                window.location.reload();
+            };
+        },
+        error : function() {
+            //alert("hhh");
+        }
+    });
 }

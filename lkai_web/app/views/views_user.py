@@ -7,37 +7,47 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from xml.dom.minidom import Document
 from app.models import PropDefault, PropertyData, Entity, User, EntityNew, PropertyDataNew
+from django.db import connection
+
+
 
 tag_list = [
-    ["lkai.prop.报告名称", "lkai.prop.首字母缩写", "lkai.prop.别称", "lkai.prop.英文名称", "lkai.prop.英文缩写", "lkai.prop.大红本编码"],
+    ["lkai.prop.报告名称", "lkai.prop.首字母缩写", "lkai.prop.别称", "lkai.prop.英文名称", "lkai.prop.英文缩写", "lkai.prop.编码"],
     ["lkai.prop.定义", "lkai.prop.科室归类", "lkai.prop.人群划分", "lkai.prop.检查归类", "lkai.prop.是否空腹", "lkai.prop.参考价格",
      "lkai.prop.适宜人群", "lkai.prop.不适宜人群", "lkai.prop.何地检测", "lkai.prop.何时检测", "lkai.prop.出单时间"],
-    ["lkai.prop.临床意义", "lkai.prop.参考范围", "lkai.prop.结果解读", "lkai.prop.相关疾病", "lkai.prop.相关症状", "lkai.prop.建议与指导"],
+    ["lkai.prop.临床意义", "lkai.prop.参考范围", "lkai.prop.结果解读", "lkai.prop.建议与指导", "lkai.prop.相关疾病", "lkai.prop.相关症状"],
     ["lkai.prop.检查过程", "lkai.prop.检查注意事项", "lkai.prop.不良反应与风险"],
     ["lkai.prop.检测方法", "lkai.prop.样本要求", "lkai.prop.采样要求", "lkai.prop.保存条件", "lkai.prop.拒收条件"]
 ]
 
+tips = {'lkai.prop.参考范围':'不同性别及不同年龄段的参考范围，请分行填写 ',
+        'lkai.prop.建议与指导':'根据结果解读的结果，给出初步医学分析与建议，不涉及临床诊疗及用药指导',
+        'lkai.prop.相关疾病':'根据结果解读的结果，提取疾病名称，疾病名之间用“；”分隔',
+        'lkai.prop.结果解读':'根据“高”“低”“阳”不同检验结果，填写相应的解释（结果异常归“阳性”',
+        'lkai.prop.报告名称':'若名称有误（多字、少字、错字）请修改正确',
+        'lkai.prop.别称':'有多个别称的，以“；”相隔即可 ',}
+
 enumPropDic = {
-    '检查归类': ['血常规', '尿常规', '便常规', '肝功能', '肾功能', '甲状腺功能', '血糖', '血脂', '肿瘤标志物', '激素检查',
+    '检查归类': ['无','血常规', '尿常规', '便常规', '肝功能', '肾功能', '甲状腺功能', '血糖', '血脂', '肿瘤标志物', '激素检查',
              '血清电解质', '血清酶', '凝血功能', '微量元素', '生化检查', '病原体检查', '免疫学检查', '其他'],
-    '科室归类': {'内科': ['心血管内科', '神经内科', '消化内科', '呼吸内科', '内分泌科', '肾病科', '血液内科', '感染科', '肝病科', '风湿免疫科', '老年病科', '变态反应科'],
+    '科室归类': {'无': ['无',],
+              '内科': ['心血管内科', '神经内科', '消化内科', '呼吸内科', '内分泌科', '肾病科', '血液内科', '感染科', '肝病科', '风湿免疫科', '老年病科', '变态反应科'],
              '外科': ['泌尿外科', '神经外科', '肝胆外科', '乳腺外科', '心血管外科', '胸外科', '乳腺外科', '肛肠科', '整形外科', '骨外科'],
              '儿科': ['小儿外科', '小儿内科', '新生儿科'],
              '妇产科': ['妇科', '产科', '计划生育科'],
              '五官科': ['耳鼻喉科', '口腔科', '眼科'],
              '皮肤性病科': ['皮肤科', '性病科'],
              '肿瘤科': ['肿瘤内科', '肿瘤外科', '放疗科', '肿瘤康复科'],
-             '其他': [],
+             '其他': ['其它',],
              },
-    '人群划分': ['男性', '女性', '老人', '儿童'],
-    '是否空腹': ['是', '否'],
+    '人群划分': ['无','男性', '女性', '老人', '儿童'],
+    '是否空腹': ['无','是', '否'],
 }
 
 tagPropDic = ['相关疾病', '相关症状', '建议与指导']
 
 objectType = {"结果解读": ['高于正常值', '低于正常值', '阳性', '阴性'],
-              "相关疾病": ['高于正常值', '低于正常值', '阳性', '阴性'],
-              "相关症状": ['高于正常值', '低于正常值', '阳性', '阴性'],
+              # "相关疾病": ['高于正常值', '低于正常值', '阳性', '阴性'],
               "建议与指导": ['高于正常值', '低于正常值', '阳性', '阴性'], }
 
 listType = {"参考范围": ['性别', '年龄段', '范围'], }
@@ -59,6 +69,7 @@ def getProp(request):
     if datatype == 'new':
         if propid in prop_list_new:
             result = prop_list_new[propid]
+
             subpropid = request.GET.get('subpropid')
             if subpropid is not None:
                 if subpropid in result:
@@ -66,7 +77,7 @@ def getProp(request):
                 else:
                     result = ''
         elif propid.split('.')[-1] in listType:
-            result = [['', '', '']]
+            result = [['无', '成人', '']]
 
     elif datatype == 'old':
         if propid in prop_list:
@@ -82,19 +93,12 @@ def getProp(request):
 
 def search(request):
     if request.is_ajax():
-        data = json.loads(request.body)
+        data = json.loads(request.body.decode('utf-8'))
         result = {}
         userName = request.session.get("username_check")
         EID = 'lkai.ent.'+data['str']
-        category = data['category']
-        if category == 'finished':
-           queryRes =  Entity.objects.filter(EID=EID, check_name=userName,check=1)
-        elif category == 'unfinish':
-            queryRes = Entity.objects.filter(EID=EID, check_name=userName, check=0)
-        elif category == 'unsure':
-            queryRes = EntityNew.objects.filter(EID=EID, check_name=userName, doubt=1)
-        else:
-            return HttpResponse(status=404)
+        queryRes = Entity.objects.filter(EID=EID, check_name=userName)
+
         if len(queryRes) > 0:
             result['resultCode'] = 200
         else:
@@ -103,12 +107,39 @@ def search(request):
         return HttpResponse(json.dumps(result, default={}, ensure_ascii=False), content_type='application/json')
 
 
+def getAllZB(request):
+    username = request.session.get("username_check")
+    result = []
+
+    for item in EntityNew.objects.filter(check_name=username, doubt=1):
+        resDIc = {'eid':item.EID, 'name':item.EID.split('.')[-1], 'isFinished': 2}
+        result.append(resDIc)
+    for item in Entity.objects.filter(check_name=username, check__gt=0):
+        resDIc = {'eid': item.EID, 'name': item.EID.split('.')[-1], 'isFinished': 0}
+        result.append(resDIc)
+    for item in Entity.objects.filter(check_name=username, check=0):
+        resDIc = {'eid': item.EID, 'name': item.EID.split('.')[-1], 'isFinished': 1}
+        result.append(resDIc)
+
+    return HttpResponse(json.dumps(result, default=[], ensure_ascii=False), content_type='application/json')
+
+
+def jumpZB(request):
+    if request.is_ajax():
+        # data = json.loads(request.body)
+        username = request.session.get("username_check")
+        eid = request.session.get('eid')
+
+        Entity.objects.update_or_create(EID=eid, check_name=username, defaults={'check': 2})
+        return HttpResponse(json.dumps({'resultCode': 200}, default={}, ensure_ascii=False), content_type='application/json')
+
+
 # 处理客户端提交的数据
 def getEdit(request):
     if request.is_ajax():
 
         global formCheckList
-        propList = json.loads(request.body)
+        propList = json.loads(request.body.decode('utf-8'))
         name = request.session.get("username_check")
         formIndex = propList[-1]
         print('formIndex: ', formIndex)
@@ -120,9 +151,9 @@ def getEdit(request):
                 propVal = prop['value']
                 propID = prop['propid']
                 eid = prop['eid']
-                if propVal != '':
-                    formCheckList[formIndex - 1] = formCheckList[formIndex - 1] or prop['ischecked']
 
+                formCheckList[formIndex - 1] = formCheckList[formIndex - 1] or prop['ischecked']
+                if propVal != '':
                     # 组合结构
                     if isinstance(propVal, dict):
                         zhibiao = PropertyDataNew.objects.filter(EID=eid, PROPID=propID, ownuser=name)
@@ -137,7 +168,7 @@ def getEdit(request):
                         parsePropDic(propVal, preObjid, objid, eid, prop['ischecked'], name)
 
                     elif isinstance(propVal, str):
-                        # print(propVal)
+
                         PropertyDataNew.objects.update_or_create\
                             (EID=eid, PROPID=propID, defaults={'doubt': prop['ischecked'],
                                                                'prop_value': propVal, 'ownuser': name})
@@ -161,6 +192,12 @@ def getEdit(request):
                                                                ownuser=name, objid=objid, prop_value=values[index])
                     else:
                         print(type(prop['value']), prop['value'])
+                # 空值的存疑状态也要保存
+                else:
+                    PropertyDataNew.objects.update_or_create\
+                        (EID=eid, PROPID=propID, defaults={'doubt': prop['ischecked'],
+                                                           'prop_value': propVal, 'ownuser': name})
+
         if formIndex == 5:
             zbDoubt = False
             for formCheck in formCheckList:
@@ -172,7 +209,7 @@ def getEdit(request):
                 doubt = 1
             EntityNew.objects.update_or_create(EID=prop['eid'], CPTID='lkai.检验指标', ownuser=name, check_name=name,
                                                name=prop['eid'].split('.')[-1], defaults={'doubt': doubt})
-        return HttpResponse(status=200)
+        return HttpResponse(json.dumps({'resultCode': 200}, default={}, ensure_ascii=False), content_type='application/json')
 
     return HttpResponse(status=404)
 
@@ -214,29 +251,27 @@ def getUserInfo(request):
     else:
         return render(request, 'index_test.html')
     eid = request.session['eid']
-    userDic['itemName'] = eid
-
-    finished = Entity.objects.filter(check_name=userName, check=1)
-
-    userDic['finished'] = len(finished)
-    userDic['unfinished'] = len(unfinished)
-    userDic['all'] = userDic['finished'] + userDic['unfinished']
-    userDic['doubtNo'] = len(EntityNew.objects.filter(check_name=userName, doubt=1))
-    allItem = []
-    itemDic = {}
-    for entity in finished:
-        itemDic = {}
-        itemDic['eid'] = entity.EID
-        itemDic['name'] = entity.EID.split('.')[-1]
-        itemDic['isFinished'] = 1
-        allItem.append(itemDic)
-    for entity in unfinished:
-        itemDic = {}
-        itemDic['eid'] = entity.EID
-        itemDic['name'] = entity.EID.split('.')[-1]
-        itemDic['isFinished'] = 0
-        allItem.append(itemDic)
-    userDic['allItem'] = allItem
+    userDic['itemName'] = eid.split('.')[-1]
+    finished = Entity.objects.filter(check_name=userName, check__gt=0)
+    userDic['finishedNumber'] = len(finished)
+    userDic['unfinishNumber'] = len(unfinished)
+    userDic['all'] = userDic['finishedNumber'] + userDic['unfinishNumber']
+    userDic['doubt'] = len(EntityNew.objects.filter(check_name=userName, doubt=1))
+    # allItem = []
+    # itemDic = {}
+    # for entity in finished:
+    #     itemDic = {}
+    #     itemDic['eid'] = entity.EID
+    #     itemDic['name'] = entity.EID.split('.')[-1]
+    #     itemDic['isFinished'] = 1
+    #     allItem.append(itemDic)
+    # for entity in unfinished:
+    #     itemDic = {}
+    #     itemDic['eid'] = entity.EID
+    #     itemDic['name'] = entity.EID.split('.')[-1]
+    #     itemDic['isFinished'] = 0
+    #     allItem.append(itemDic)
+    # userDic['allItem'] = allItem
     result = {"userInfo": [userDic]}
 
     return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),
@@ -247,7 +282,7 @@ def getPropList(EID):
     result = {}
 
     oldProps = PropertyData.objects.filter(EID=EID, objid=None)
-    print(oldProps, len(oldProps))
+
     for prop in oldProps:
 
         if prop.PROPID in result:
@@ -262,6 +297,7 @@ def getPropList(EID):
 def getSingleProp(prop: PropertyData, EID, propID, p_list, layer=1):
 
     if is_number(prop.prop_value):
+
         subProps = PropertyData.objects.filter(EID=EID, objid=prop.prop_value)
 
         if layer > 1:
@@ -270,6 +306,7 @@ def getSingleProp(prop: PropertyData, EID, propID, p_list, layer=1):
             getSingleProp(subProp, EID, propID, p_list, layer + 1)
 
     else:
+
         if layer == 1:
             p_list[propID] += prop.prop_value + '\n'
         else:
@@ -288,7 +325,7 @@ def getPropListNew(EID):
             temp = getSinglePropNew(EID, prop.prop_value)
             result[prop.PROPID].append( [ temp[item] if item in temp else '' for item in listType[propName]] )
         else:
-            if is_number(prop.prop_value):
+            if is_number(prop.prop_value) and propName != '参考价格':
                 if prop.PROPID.split('.')[-1] in listType:
                     temp = getSinglePropNew(EID, prop.prop_value)
                     result[prop.PROPID]= [[temp[item] if item in temp else '' for item in listType[propName]]]
@@ -306,6 +343,9 @@ def getSinglePropNew(EID, objid):
     subProps = PropertyDataNew.objects.filter(EID=EID, objid=objid)
     for subProp in subProps:
         subPropName = subProp.PROPID.split('.')[-1]
+
+        # bug: 1天 无法显示
+
         if is_number(subProp.prop_value):
             result[subPropName] = getSinglePropNew(EID, subProp.prop_value)
         else:
@@ -329,7 +369,10 @@ def bussiness2(request):
     prop_list = getPropList(EID)
     prop_list_new = getPropListNew(EID)
 
-    result = genDefJson(EID)
+    result = genDefJson(EID,userName)
+
+    # for item in connection.queries:
+    #     print(item['time'])
 
     return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),
                         content_type='application/json')
@@ -337,24 +380,33 @@ def bussiness2(request):
 
 def test2(request):
     # result = getAllPropDataDic('lkai.ent.低密度脂蛋白胆固醇', 'lkai.prop.结果解读')
-    #result = genDefJson('lkai.ent.低密度脂蛋白胆固醇')
-    result = getPropList('lkai.ent.红细胞表面电荷')
+    # result = genDefJson('lkai.ent.骨髓各系细胞形态学检查','chenlu')
+
     # result = PropertyData.objects.filter(EID='lkai.ent.可的松水试验',PROPID='lkai.prop.结果解读')
+    result = PropertyData.objects.filter(PROPID='lkai.prop.编码')
+    for item in result:
+        print(item.prop_value)
 
-    return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),
-                        content_type='application/json')
+    return HttpResponse('hhh')
+    # return HttpResponse(json.dumps(result, default={}, ensure_ascii=False),
+    #                     content_type='application/json')
 
 
-def genDefJson(EID):
+def genDefJson(EID, username):
     result = {'EID': EID, 'name': EID.split('.')[-1],
               'DEF_1': [], 'DEF_2': [], 'DEF_3': [], 'DEF_4': [], 'DEF_5': [], }
-
+    doubtList = [item.PROPID for item in PropertyDataNew.objects.filter(EID=EID, objid=None, ownuser=username, doubt=1)]
+    doubtStr = ""
     # 属性分为5组，分组信息在tag_list中
     for index, tags in enumerate(tag_list):
         listName = 'DEF_' + str(index + 1)
-        for tag in tags:
+        for subIndex, tag in enumerate(tags):
+            if tag in doubtList:
+                doubtStr += str(index+1)+str(subIndex+1)+','
             # 每个属性对应一个字典
-            propDic = {'propid': tag, 'name': tag.split('.')[-1]}
+            propDic = {'propid': tag, 'name': tag.split('.')[-1], 'tip':''}
+            if tag in tips:
+                propDic['tip'] = tips[tag];
             # 可选类型
             if propDic['name'] in enumPropDic:
                 propDic['type'] = 'select'
@@ -362,7 +414,7 @@ def genDefJson(EID):
             #
             elif propDic['name'] in listType:
                 propDic['type'] = 'list'
-                num = len(PropertyDataNew.objects.filter(EID=EID, PROPID=tag))
+                num = len(PropertyDataNew.objects.filter(EID=EID, PROPID=tag,ownuser=username))
                 if num == 0:
                     propDic['num'] = 1
                 else:
@@ -376,6 +428,8 @@ def genDefJson(EID):
                 propDic['type'] = 'string'
 
             result[listName].append(propDic)
+    result['doubt'] = doubtStr[:-1]
+
     return result
 
 
@@ -474,17 +528,8 @@ def insert_quota(request):
 
 def f_search(request):
     q = request.GET['text']
-    category = request.GET['sel']
     userName = request.session.get("username_check")
-    if category == 'finished':
-        re_contents = Entity.objects.filter(EID__contains=q, check_name=userName, check=1)
-    elif category == 'unfinish':
-        re_contents = Entity.objects.filter(EID__contains=q, check_name=userName, check=0)
-    elif category == 'unsure':
-        re_contents = EntityNew.objects.filter(EID__contains=q, check_name=userName, doubt=1)
-    else:
-        re_contents = []
-
+    re_contents = Entity.objects.filter(EID__contains=q, check_name=userName)
     re_json = []
     for re_content in re_contents:
         quota_name = re_content.EID.split(".")[-1]
@@ -495,11 +540,7 @@ def f_search(request):
     return HttpResponse(",".join(re_json), content_type="application/string")
 
 
-def data(request):
-    return render(request, "index_admin.html")
 
-
-data = staff_member_required(data)
 
 
 # def get_value(objid_q, prop_list_q):
@@ -514,22 +555,34 @@ data = staff_member_required(data)
 #                 return_string = get_value(item1.prop_value, prop_list_q)
 #     return return_string
 
-
 def is_number(s):
-    s = s[:-1]
-    # print(s)
-    try:
-        float(s)
-        return True
-    except (TypeError, ValueError):
-        pass
-    try:
-        import unicodedata
-        unicodedata.numeric(s)
-        return True
-    except (TypeError, ValueError):
-        pass
-    return False
+    if s != '':
+        firstChar = s[0]
+        lastChar = s[-1]
+        s = s[:-1]
+        # print(s)
+
+        if lastChar in ['a','b','0','1','2','3','4','5','6','7','8','9']\
+                and firstChar in ['0','1','2','3','4','5','6','7','8','9'] :
+            try:
+                float(s)
+                return True
+            except (TypeError, ValueError):
+                pass
+            try:
+                import unicodedata
+                unicodedata.numeric(s)
+
+                return True
+            except (TypeError, ValueError):
+                pass
+
+            return False
+        else:
+            return False
+    else:
+        return False
+
 
 
 # def get_value(objid, prop_list_q): return_value = [] for item in prop_list_q: if item.objid == objid and not
@@ -601,7 +654,7 @@ def bussiness_search(request):
     if EID_NEW.exists():
         tag = True
         prop_list_new = PropertyDataNew.objects.filter(EID=str(EID_NEW[0]))
-        print(prop_list_new)
+
         quota_list_new = concatenate(prop_list_new)
     quota_name = str(EID).split(".")[-1]
     request.session['quota_name'] = quota_name
@@ -1414,9 +1467,6 @@ def bussiness(request):
     # print(json.dumps(bussiness, default=quota_to_json, ensure_ascii=False, indent=2))
     return HttpResponse(json.dumps(bussiness, default=quota_to_json, ensure_ascii=False),
                         content_type='application/json')
-
-
-
 
 
 def insert(request):
